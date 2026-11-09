@@ -1,140 +1,69 @@
-#include <iostream>
-#include <vector>
+#include <bits/stdc++.h>
 using namespace std;
 
-class Heap
+void minHeapify(vector<int> &a, int n, int i)
 {
-  vector<int> h;
-  bool isMin;
+  int smallest = i;
+  int left = 2 * i + 1;
+  int right = 2 * i + 2;
 
-public:
-  // Create Heap
-  Heap(bool type)
+  if (left < n && a[left] < a[smallest])
+    smallest = left;
+
+  if (right < n && a[right] < a[smallest])
+    smallest = right;
+
+  if (smallest != i)
   {
-    isMin = type;
-    create();
+    swap(a[i], a[smallest]);
+    minHeapify(a, n, smallest);
   }
+}
 
-  void create()
+void maxHeapify(vector<int> &a, int n, int i)
+{
+  int largest = i;
+  int left = 2 * i + 1;
+  int right = 2 * i + 2;
+
+  if (left < n && a[left] > a[largest])
+    largest = left;
+
+  if (right < n && a[right] > a[largest])
+    largest = right;
+
+  if (largest != i)
   {
-    h.clear();
+    swap(a[i], a[largest]);
+    maxHeapify(a, n, largest);
   }
+}
 
-  // Compare elements according to heap type
-  bool compare(int a, int b)
-  {
-    if (isMin)
-      return a < b;
-    else
-      return a > b;
-  }
+void buildMinHeap(vector<int> &a, int n)
+{
+  for (int i = n / 2 - 1; i >= 0; i--)
+    minHeapify(a, n, i);
+}
 
-  // Reheap Up
-  void reheapUp(int i)
-  {
-    while (i > 0)
-    {
-      int parent = (i - 1) / 2;
-
-      if (compare(h[i], h[parent]))
-      {
-        swap(h[i], h[parent]);
-        i = parent;
-      }
-      else
-        break;
-    }
-  }
-
-  // Insert Element
-  void insert(int value)
-  {
-    h.push_back(value);
-
-    int i = h.size() - 1;
-    reheapUp(i);
-  }
-
-  // Reheap Down
-  void reheapDown(int i)
-  {
-    int n = h.size();
-
-    while (true)
-    {
-      int left = 2 * i + 1;
-      int right = 2 * i + 2;
-      int best = i;
-
-      if (left < n && compare(h[left], h[best]))
-        best = left;
-
-      if (right < n && compare(h[right], h[best]))
-        best = right;
-
-      if (best != i)
-      {
-        swap(h[i], h[best]);
-        i = best;
-      }
-      else
-        break;
-    }
-  }
-
-  // Delete Root Element
-  bool deleteRoot(int &value)
-  {
-    if (h.empty())
-      return false;
-
-    value = h[0];
-
-    h[0] = h.back();
-    h.pop_back();
-
-    if (!h.empty())
-      reheapDown(0);
-
-    return true;
-  }
-
-  // Display Heap
-  void display()
-  {
-    if (h.empty())
-    {
-      cout << "Heap is empty!";
-      return;
-    }
-
-    for (int x : h)
-      cout << x << " ";
-
-    cout << endl;
-  }
-};
+void buildMaxHeap(vector<int> &a, int n)
+{
+  for (int i = n / 2 - 1; i >= 0; i--)
+    maxHeapify(a, n, i);
+}
 
 int main()
 {
-
-  Heap minHeap(true);
-  Heap maxHeap(false);
-
-  int choice, value;
+  vector<int> marks, minHeap, maxHeap;
+  int n, choice;
 
   do
   {
-    cout << "\n\n----- HEAP ADT MENU -----";
-    cout << "\n1. Insert into Min Heap";
-    cout << "\n2. Insert into Max Heap";
-    cout << "\n3. Delete from Min Heap";
-    cout << "\n4. Delete from Max Heap";
-    cout << "\n5. Display Min Heap";
-    cout << "\n6. Display Max Heap";
-    cout << "\n7. Create / Reset Min Heap";
-    cout << "\n8. Create / Reset Max Heap";
-    cout << "\n9. Exit";
+    cout << "\n\n----- MENU -----";
+    cout << "\n1. Enter Student Marks";
+    cout << "\n2. Display Marks";
+    cout << "\n3. Find Minimum Marks";
+    cout << "\n4. Find Maximum Marks";
+    cout << "\n5. Exit";
 
     cout << "\nEnter choice: ";
     cin >> choice;
@@ -143,60 +72,74 @@ int main()
     {
 
     case 1:
-      cout << "Enter value: ";
-      cin >> value;
-      minHeap.insert(value);
+      cout << "Enter number of students: ";
+      cin >> n;
+
+      if (n <= 0)
+      {
+        cout << "Invalid number of students!";
+        break;
+      }
+
+      marks.resize(n);
+
+      cout << "Enter marks:\n";
+      for (int i = 0; i < n; i++)
+      {
+        cin >> marks[i];
+      }
+
+      minHeap = marks;
+      maxHeap = marks;
+
+      buildMinHeap(minHeap, n);
+      buildMaxHeap(maxHeap, n);
+
+      cout << "Heaps created successfully!";
       break;
 
     case 2:
-      cout << "Enter value: ";
-      cin >> value;
-      maxHeap.insert(value);
+      if (marks.empty())
+      {
+        cout << "Enter marks first!";
+        break;
+      }
+
+      cout << "Student Marks: ";
+      for (int x : marks)
+        cout << x << " ";
+
       break;
 
     case 3:
-      if (minHeap.deleteRoot(value))
-        cout << "Deleted minimum: " << value;
-      else
-        cout << "Min Heap is empty!";
+      if (minHeap.empty())
+      {
+        cout << "Enter marks first!";
+        break;
+      }
+
+      cout << "Minimum Marks: " << minHeap[0];
       break;
 
     case 4:
-      if (maxHeap.deleteRoot(value))
-        cout << "Deleted maximum: " << value;
-      else
-        cout << "Max Heap is empty!";
+      if (maxHeap.empty())
+      {
+        cout << "Enter marks first!";
+        break;
+      }
+
+      cout << "Maximum Marks: " << maxHeap[0];
       break;
 
     case 5:
-      cout << "Min Heap: ";
-      minHeap.display();
-      break;
-
-    case 6:
-      cout << "Max Heap: ";
-      maxHeap.display();
-      break;
-
-    case 7:
-      minHeap.create();
-      cout << "Min Heap created/reset!";
-      break;
-
-    case 8:
-      maxHeap.create();
-      cout << "Max Heap created/reset!";
-      break;
-
-    case 9:
-      cout << "Exiting...";
+      cout << "Exiting program...";
       break;
 
     default:
       cout << "Invalid choice!";
     }
 
-  } while (choice != 9);
+  } while (choice != 5);
 
   return 0;
 }
