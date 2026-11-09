@@ -10,6 +10,9 @@ DROP TABLE IF EXISTS placed;
 DROP TABLE IF EXISTS comp;
 DROP TABLE IF EXISTS officers;
 
+--symply just do create ddatabase company; itna karne ki jarurat nahi 
+
+
 CREATE TABLE officers (
     off_name VARCHAR(100) PRIMARY KEY,
     street VARCHAR(100) NOT NULL,

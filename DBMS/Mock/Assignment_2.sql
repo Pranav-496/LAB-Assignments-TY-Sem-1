@@ -8,6 +8,8 @@ DROP VIEW IF EXISTS pune_instructor_student_count;
 DROP TABLE IF EXISTS students;
 DROP TABLE IF EXISTS instructors;
 
+--symply just do create ddatabase college; itna karne ki jarurat nahi 
+
 CREATE TABLE instructors (
     instructor_id INT PRIMARY KEY,
     instructor_name VARCHAR(100) NOT NULL,
