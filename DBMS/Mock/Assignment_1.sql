@@ -10,7 +10,7 @@ DROP TABLE IF EXISTS placed;
 DROP TABLE IF EXISTS comp;
 DROP TABLE IF EXISTS officers;
 
---symply just do create ddatabase company; itna karne ki jarurat nahi 
+--symply just do create database company; itna karne ki jarurat nahi 
 
 
 CREATE TABLE officers (
