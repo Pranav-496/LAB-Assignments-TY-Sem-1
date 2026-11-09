@@ -54,16 +54,3 @@ assignment solutions.
 | 6 | Python and MySQL Database Connectivity | [Assignment_6.txt](./DBMS/Assignment_6.txt) |
 | 7 | MongoDB Queries | [Assignment_7.txt](./DBMS/Assignment_7.txt) |
 | 8 | MongoDB Aggregation and Indexing | [Assignment_8.txt](./DBMS/Assignment_8.txt) |
-
-## Running the programs
-
-DSA programs are individual C++ source files. Compile a selected file with a
-C++ compiler such as `g++`, then run the resulting executable. For example:
-
-```powershell
-g++ .\DSA\TY_A_42\Assignment_02_BST_ADT.cpp -o .\bst.exe
-.\bst.exe
-```
-
-DBMS files contain SQL or code examples; use the database system and setup
-instructions noted in the relevant assignment file.
