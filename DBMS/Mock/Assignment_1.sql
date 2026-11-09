@@ -167,22 +167,14 @@ WHERE p.salary > (
 SELECT company_name
 FROM placed
 GROUP BY company_name
-HAVING COUNT(*) >= ALL (
-    SELECT COUNT(*)
-    FROM placed
-    GROUP BY company_name
-);
-
+ORDER BY count(*) desc limit 1;
+--ORDER BY count(*) desc limit 2; --for two companies
 -- 11. Find the company or companies with the smallest payroll (including ties).
 -- Expected: Microsoft (payroll 30000; 1 row).
 SELECT company_name
 FROM placed
 GROUP BY company_name
-HAVING SUM(salary) <= ALL (
-    SELECT SUM(salary)
-    FROM placed
-    GROUP BY company_name
-);
+ORDER BY sum(salary) desc limit 1;
 
 -- 12. Find companies whose average salary is higher than TCS's average salary.
 -- Expected: Amazon (average 42500) and Google (average 70000; 2 rows).
