@@ -12,122 +12,150 @@ The program should:
 #include <bits/stdc++.h>
 using namespace std;
 
+struct Node
+{
+    int vertex;
+    Node *next;
+};
+
 class Graph
 {
+    Node *adj[10];
+    int n;
+
 public:
-  int n;
-  vector<int> adj[10];
-
-  Graph(int size)
-  {
-    n = size;
-  }
-
-  void addFriend(int u, int v)
-  {
-    adj[u].push_back(v);
-    adj[v].push_back(u);
-
-    cout << "Friendship added successfully.\n";
-  }
-
-  void checkFriend(int u, int v)
-  {
-    for (int x : adj[u])
+    Graph(int vertices)
     {
-      if (x == v)
-      {
-        cout << "Users are friends.\n";
-        return;
-      }
+        n = vertices;
+
+        for (int i = 0; i < n; i++)
+            adj[i] = NULL;
     }
 
-    cout << "Users are not friends.\n";
-  }
-
-  void displayFriends(int u)
-  {
-    cout << "Friends of User " << u << ": ";
-
-    for (int x : adj[u])
-      cout << x << " ";
-
-    cout << endl;
-  }
-
-  void display()
-  {
-    cout << "\nAdjacency List:\n";
-
-    for (int i = 0; i < n; i++)
+    void addFriend(int u, int v)
     {
-      cout << i << " -> ";
+        Node *newNode = new Node{v, adj[u]};
+        adj[u] = newNode;
 
-      for (int x : adj[i])
-        cout << x << " -> ";
+        newNode = new Node{u, adj[v]};
+        adj[v] = newNode;
 
-      cout << "NULL\n";
+        cout << "Friendship added.\n";
     }
-  }
+
+    bool checkFriend(int u, int v)
+    {
+        Node *temp = adj[u];
+
+        while (temp != NULL)
+        {
+            if (temp->vertex == v)
+                return true;
+
+            temp = temp->next;
+        }
+
+        return false;
+    }
+
+    void displayFriends(int u)
+    {
+        Node *temp = adj[u];
+
+        cout << "Friends of User " << u << ": ";
+
+        if (temp == NULL)
+            cout << "No friends";
+
+        while (temp != NULL)
+        {
+            cout << temp->vertex << " ";
+            temp = temp->next;
+        }
+
+        cout << endl;
+    }
+
+    void display()
+    {
+        cout << "\nAdjacency List:\n";
+
+        for (int i = 0; i < n; i++)
+        {
+            cout << i << " -> ";
+            Node *temp = adj[i];
+
+            while (temp != NULL)
+            {
+                cout << temp->vertex << " -> ";
+                temp = temp->next;
+            }
+
+            cout << "NULL\n";
+        }
+    }
 };
 
 int main()
 {
-  int n, choice, u, v;
+    int n, choice, u, v;
 
-  cout << "Enter number of users: ";
-  cin >> n;
+    cout << "Enter number of users: ";
+    cin >> n;
 
-  Graph g(n);
+    Graph g(n);
 
-  do
-  {
-    cout << "\n------ MENU ------\n";
-    cout << "1. Add Friendship\n";
-    cout << "2. Check Friendship\n";
-    cout << "3. Display Friends of User\n";
-    cout << "4. Display Adjacency List\n";
-    cout << "5. Exit\n";
-
-    cout << "Enter choice: ";
-    cin >> choice;
-
-    switch (choice)
+    do
     {
-    case 1:
-      cout << "Enter two user IDs: ";
-      cin >> u >> v;
-      g.addFriend(u, v);
-      break;
+        cout << "\n1. Add Friendship";
+        cout << "\n2. Check Friendship";
+        cout << "\n3. Display Friends";
+        cout << "\n4. Display Adjacency List";
+        cout << "\n5. Exit";
+        cout << "\nEnter choice: ";
+        cin >> choice;
 
-    case 2:
-      cout << "Enter two user IDs: ";
-      cin >> u >> v;
-      g.checkFriend(u, v);
-      break;
+        switch (choice)
+        {
+        case 1:
+            cout << "Enter two user IDs: ";
+            cin >> u >> v;
+            g.addFriend(u, v);
+            break;
 
-    case 3:
-      cout << "Enter user ID: ";
-      cin >> u;
-      g.displayFriends(u);
-      break;
+        case 2:
+            cout << "Enter two user IDs: ";
+            cin >> u >> v;
 
-    case 4:
-      g.display();
-      break;
+            if (g.checkFriend(u, v))
+                cout << "Users are friends.\n";
+            else
+                cout << "Users are not friends.\n";
+            break;
 
-    case 5:
-      cout << "Chalo Bye!\n";
-      break;
+        case 3:
+            cout << "Enter user ID: ";
+            cin >> u;
+            g.displayFriends(u);
+            break;
 
-    default:
-      cout << "Invalid Choice!\n";
-    }
+        case 4:
+            g.display();
+            break;
 
-  } while (choice != 5);
+        case 5:
+            cout << "Exiting...\n";
+            break;
 
-  return 0;
+        default:
+            cout << "Invalid choice!\n";
+        }
+
+    } while (choice != 5);
+
+    return 0;
 }
+
 
 // Adjacency Matrix
 

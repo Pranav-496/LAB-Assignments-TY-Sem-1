@@ -13,63 +13,86 @@ The program should:
 #include <bits/stdc++.h>
 using namespace std;
 
+struct Node
+{
+  int vertex;
+  int weight;
+  Node *next;
+};
+
 class Graph
 {
-public:
+  Node *adj[10];
   int n;
-  vector<pair<int, int>> adj[10];
 
-  Graph(int size)
+public:
+  Graph(int vertices)
   {
-    n = size;
+    n = vertices;
+
+    for (int i = 0; i < n; i++)
+      adj[i] = NULL;
   }
 
-  void addPartnership(int u, int v, int weight)
+  void addPartnership(int u, int v, int w)
   {
-    adj[u].push_back({v, weight});
-    adj[v].push_back({u, weight});
+    Node *newNode = new Node{v, w, adj[u]};
+    adj[u] = newNode;
 
-    cout << "Partnership added successfully.\n";
+    newNode = new Node{u, w, adj[v]};
+    adj[v] = newNode;
+
+    cout << "Partnership added.\n";
   }
 
-  void checkPartnership(int u, int v)
+  bool checkPartnership(int u, int v)
   {
-    for (auto x : adj[u])
+    Node *temp = adj[u];
+
+    while (temp != NULL)
     {
-      if (x.first == v)
-      {
-        cout << "Partnership exists.\n";
-        cout << "Partnership Strength = " << x.second;
-        return;
-      }
+      if (temp->vertex == v)
+        return true;
+
+      temp = temp->next;
     }
 
-    cout << "No partnership exists.\n";
+    return false;
   }
 
-  void displayConnected(int u)
+  void displayConnections(int u)
   {
-    cout << "Airlines connected with Airline " << u << ":\n";
+    Node *temp = adj[u];
 
-    for (auto x : adj[u])
+    cout << "Airline " << u << " connections:\n";
+
+    if (temp == NULL)
+      cout << "No connections\n";
+
+    while (temp != NULL)
     {
-      cout << "Airline " << x.first
-           << " (Strength = " << x.second << ")\n";
+      cout << "Airline " << temp->vertex
+           << " (Strength: " << temp->weight << ")\n";
+
+      temp = temp->next;
     }
   }
 
   void display()
   {
-    cout << "\nAdjacency List:\n";
+    cout << "\nWeighted Adjacency List:\n";
 
     for (int i = 0; i < n; i++)
     {
-      cout << "Airline " << i << " -> ";
+      cout << i << " -> ";
+      Node *temp = adj[i];
 
-      for (auto x : adj[i])
+      while (temp != NULL)
       {
-        cout << "(" << x.first
-             << ", " << x.second << ") -> ";
+        cout << "(" << temp->vertex
+             << ", " << temp->weight << ") -> ";
+
+        temp = temp->next;
       }
 
       cout << "NULL\n";
@@ -79,7 +102,7 @@ public:
 
 int main()
 {
-  int n, choice, u, v, weight;
+  int n, choice, u, v, w;
 
   cout << "Enter number of airlines: ";
   cin >> n;
@@ -88,40 +111,36 @@ int main()
 
   do
   {
-    cout << "\n----- AIRLINE PARTNERSHIP MENU -----\n";
-    cout << "1. Add Partnership\n";
-    cout << "2. Check Partnership\n";
-    cout << "3. Display Connected Airlines\n";
-    cout << "4. Display Adjacency List\n";
-    cout << "5. Exit\n";
-
-    cout << "Enter choice: ";
+    cout << "\n1. Add Partnership";
+    cout << "\n2. Check Partnership";
+    cout << "\n3. Display Connected Airlines";
+    cout << "\n4. Display Adjacency List";
+    cout << "\n5. Exit";
+    cout << "\nEnter choice: ";
     cin >> choice;
 
     switch (choice)
     {
     case 1:
-      cout << "Enter two airline IDs: ";
-      cin >> u >> v;
-
-      cout << "Enter partnership strength: ";
-      cin >> weight;
-
-      g.addPartnership(u, v, weight);
+      cout << "Enter two airline IDs and partnership strength: ";
+      cin >> u >> v >> w;
+      g.addPartnership(u, v, w);
       break;
 
     case 2:
       cout << "Enter two airline IDs: ";
       cin >> u >> v;
 
-      g.checkPartnership(u, v);
+      if (g.checkPartnership(u, v))
+        cout << "Partnership exists.\n";
+      else
+        cout << "No partnership exists.\n";
       break;
 
     case 3:
       cout << "Enter airline ID: ";
       cin >> u;
-
-      g.displayConnected(u);
+      g.displayConnections(u);
       break;
 
     case 4:
@@ -129,11 +148,11 @@ int main()
       break;
 
     case 5:
-      cout << "Chalo Bye!\n";
+      cout << "Exiting...\n";
       break;
 
     default:
-      cout << "Invalid Choice!\n";
+      cout << "Invalid choice!\n";
     }
 
   } while (choice != 5);
