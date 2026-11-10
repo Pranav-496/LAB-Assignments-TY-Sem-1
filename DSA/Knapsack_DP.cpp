@@ -8,14 +8,14 @@ int main()
     int n, capacity;
 
     cout << "Enter number of items: ";
-    if (!(cin >> n) || n < 0)
+    if (!(cin >> n) || n < 0) // simply cin >> n bhi chalega itne drame ki jarurat nahi 
     {
         cerr << "Number of items must be a non-negative integer.\n";
         return 1;
     }
 
     cout << "Enter knapsack capacity: ";
-    if (!(cin >> capacity) || capacity < 0)
+    if (!(cin >> capacity) || capacity < 0) // simply cin >> capacity bhi chalega itne drame ki jarurat nahi 
     {
         cerr << "Capacity must be a non-negative integer.\n";
         return 1;

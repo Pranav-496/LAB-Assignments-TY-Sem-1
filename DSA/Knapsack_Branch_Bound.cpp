@@ -1,135 +1,89 @@
-#include <algorithm>
-#include <iostream>
-#include <queue>
-#include <vector>
+#include <bits/stdc++.h>
 using namespace std;
 
-struct Item
-{
-    int profit;
-    int weight;
-};
+int n, capacity, maxProfit = 0;
+vector<int> weight, profit;
 
-struct Node
+int bound(int i, int currentWeight, int currentProfit)
 {
-    int level;
-    long long weight;
-    long long profit;
-    long double bound;
-};
+    int total = currentProfit;
+    int remaining = capacity - currentWeight;
 
-struct CompareBound
-{
-    bool operator()(const Node &first, const Node &second) const
+    for (int j = i; j < n; j++)
     {
-        return first.bound < second.bound;
-    }
-};
-
-long double calculateBound(const Node &node, int capacity, const vector<Item> &items)
-{
-    if (node.weight > capacity)
-        return 0;
-
-    long long totalWeight = node.weight;
-    long double bound = node.profit;
-    int nextItem = node.level;
-
-    while (nextItem < static_cast<int>(items.size()) &&
-           totalWeight + items[nextItem].weight <= capacity)
-    {
-        totalWeight += items[nextItem].weight;
-        bound += items[nextItem].profit;
-        nextItem++;
+        if (weight[j] <= remaining)
+        {
+            remaining -= weight[j];
+            total += profit[j];
+        }
+        else
+        {
+            total += profit[j] * remaining / weight[j];
+            break;
+        }
     }
 
-    if (nextItem < static_cast<int>(items.size()))
+    return total;
+}
+
+void knapsack(int i, int currentWeight, int currentProfit)
+{
+    if (currentWeight <= capacity)
+        maxProfit = max(maxProfit, currentProfit);
+
+    if (i == n || bound(i, currentWeight, currentProfit) <= maxProfit)
+        return;
+
+    // Include item
+    if (currentWeight + weight[i] <= capacity)
     {
-        bound += static_cast<long double>(capacity - totalWeight) *
-                 items[nextItem].profit / items[nextItem].weight;
+        knapsack(i + 1,
+                 currentWeight + weight[i],
+                 currentProfit + profit[i]);
     }
 
-    return bound;
+    // Exclude item
+    knapsack(i + 1, currentWeight, currentProfit);
 }
 
 int main()
 {
-    int n, capacity;
-
     cout << "Enter number of items: ";
-    if (!(cin >> n) || n < 0)
-    {
-        cerr << "Number of items must be a non-negative integer.\n";
-        return 1;
-    }
+    cin >> n;
 
     cout << "Enter knapsack capacity: ";
-    if (!(cin >> capacity) || capacity < 0)
-    {
-        cerr << "Capacity must be a non-negative integer.\n";
-        return 1;
-    }
+    cin >> capacity;
 
-    vector<Item> items(n);
+    weight.resize(n);
+    profit.resize(n);
+
     cout << "Enter profit and weight of each item:\n";
+
+    for (int i = 0; i < n; i++)
+        cin >> profit[i] >> weight[i];
+
+    // Sort by profit/weight ratio
+    vector<pair<double, int>> items;
+
+    for (int i = 0; i < n; i++)
+        items.push_back({(double)profit[i] / weight[i], i});
+
+    sort(items.rbegin(), items.rend());
+
+    vector<int> w(n), p(n);
+
     for (int i = 0; i < n; i++)
     {
-        if (!(cin >> items[i].profit >> items[i].weight) ||
-            items[i].profit < 0 || items[i].weight < 0)
-        {
-            cerr << "Profits and weights must be non-negative integers.\n";
-            return 1;
-        }
+        w[i] = weight[items[i].second];
+        p[i] = profit[items[i].second];
     }
 
-    sort(items.begin(), items.end(), [](const Item &first, const Item &second)
-         {
-             if (first.weight == 0 || second.weight == 0)
-                 return first.weight == 0 && second.weight != 0;
-             return static_cast<long double>(first.profit) / first.weight >
-                    static_cast<long double>(second.profit) / second.weight;
-         });
+    weight = w;
+    profit = p;
 
-    priority_queue<Node, vector<Node>, CompareBound> nodes;
-    Node root{0, 0, 0, 0};
-    root.bound = calculateBound(root, capacity, items);
-    nodes.push(root);
+    knapsack(0, 0, 0);
 
-    long long maximumProfit = 0;
+    cout << "Maximum Profit = " << maxProfit << endl;
 
-    while (!nodes.empty())
-    {
-        Node current = nodes.top();
-        nodes.pop();
-
-        if (current.bound <= maximumProfit || current.level == n)
-            continue;
-
-        const Item &item = items[current.level];
-        Node include{
-            current.level + 1,
-            current.weight + item.weight,
-            current.profit + item.profit,
-            0};
-
-        if (include.weight <= capacity)
-        {
-            maximumProfit = max(maximumProfit, include.profit);
-            include.bound = calculateBound(include, capacity, items);
-            if (include.bound > maximumProfit)
-                nodes.push(include);
-        }
-
-        Node exclude{
-            current.level + 1,
-            current.weight,
-            current.profit,
-            0};
-        exclude.bound = calculateBound(exclude, capacity, items);
-        if (exclude.bound > maximumProfit)
-            nodes.push(exclude);
-    }
-
-    cout << "Maximum Profit = " << maximumProfit << endl;
     return 0;
 }

@@ -1,3 +1,23 @@
+/*
+A company receives multiple job requests, each with a priority value. 
+The manager wants to process the most important (highest priority) job first and also identify the least
+priority one for deferred execution. 
+Write a C++ program using max heap and min heap to perform the following operations:
+1. Insert a new job with its priority
+2. Find and display the highest priority and lowest priority jobs
+3. Delete the job with the highest priority
+4. Display all the jobs in order of priority.
+Also analyze the time complexity of each operation: insert, delete, find min, max.
+Operation	                            Time complexity
+Insert into Min Heap	                O(log N)
+Insert into Max Heap	                O(log N)
+Find minimum	                        O(1)
+Find maximum	                        O(1)
+Delete root from Max Heap	            O(log N)
+Synchronize Min Heap after deletion	  O(N)
+Display all jobs in sorted order	    O(N log N)
+*/
+
 #include <bits/stdc++.h>
 using namespace std;
 
