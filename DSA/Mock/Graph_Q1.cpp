@@ -3,7 +3,7 @@ Each user in a social network is connected to the others via "friend" relationsh
 If user A and user B are friends, an undirected edge exists between them.
 Write a menu-driven C++ program to represent this social network using both adjacency matrix and adjacency list.
 The program should:
-- Check if two users are directly connected
+- Check if two users are connected directly or through one intermediate user
 - Display all friends of a given user.
 */
 
@@ -43,19 +43,42 @@ public:
         cout << "Friendship added.\n";
     }
 
-    bool checkFriend(int u, int v)
+    void checkFriend(int u, int v)
     {
         Node *temp = adj[u];
-
         while (temp != NULL)
         {
             if (temp->vertex == v)
-                return true;
+            {
+                cout << "Direct connection exists.\n";
+                return;
+            }
 
             temp = temp->next;
         }
 
-        return false;
+        temp = adj[u];
+        while (temp != NULL)
+        {
+            int mid = temp->vertex;
+            Node *temp2 = adj[mid];
+
+            while (temp2 != NULL)
+            {
+                if (temp2->vertex == v)
+                {
+                    cout << "Indirect connection exists.\n";
+                    cout << u << " -> " << mid << " -> " << v << endl;
+                    return;
+                }
+
+                temp2 = temp2->next;
+            }
+
+            temp = temp->next;
+        }
+
+        cout << "No connection exists.\n";
     }
 
     void displayFriends(int u)
@@ -127,10 +150,7 @@ int main()
             cout << "Enter two user IDs: ";
             cin >> u >> v;
 
-            if (g.checkFriend(u, v))
-                cout << "Users are friends.\n";
-            else
-                cout << "Users are not friends.\n";
+            g.checkFriend(u, v);
             break;
 
         case 3:
@@ -186,9 +206,22 @@ public:
     void checkFriend(int u, int v)
     {
         if (mat[u][v] == 1)
-            cout << "Users are friends.\n";
-        else
-            cout << "Users are not friends.\n";
+        {
+            cout << "Direct connection exists.\n";
+            return;
+        }
+
+        for (int mid = 0; mid < n; mid++)
+        {
+            if (mat[u][mid] == 1 && mat[mid][v] == 1)
+            {
+                cout << "Indirect connection exists.\n";
+                cout << u << " -> " << mid << " -> " << v << endl;
+                return;
+            }
+        }
+
+        cout << "No connection exists.\n";
     }
 
     void displayFriends(int u)
@@ -250,6 +283,7 @@ int main()
         case 2:
             cout << "Enter two user IDs: ";
             cin >> u >> v;
+
             g.checkFriend(u, v);
             break;
 

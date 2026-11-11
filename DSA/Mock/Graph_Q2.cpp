@@ -4,7 +4,7 @@ If airline A has partnership with airline B, there is an edge between them.
 The edge weight can represent number of shared routes or partnership strength.
 Write a C++ program to represent this network using adjacency list and matrix.
 The program should:
-1. Check if two airlines have partnership
+1. Check if two airlines have a direct partnership or a path through one intermediate airline
 2. Display all airlines connected with a given airline
 */
 
@@ -45,19 +45,47 @@ public:
     cout << "Partnership added.\n";
   }
 
-  bool checkPartnership(int u, int v)
+  void checkPartnership(int u, int v)
   {
     Node *temp = adj[u];
 
     while (temp != NULL)
     {
       if (temp->vertex == v)
-        return true;
+      {
+        cout << "Direct partnership exists.\n";
+        cout << "Strength = " << temp->weight << endl;
+        return;
+      }
 
       temp = temp->next;
     }
 
-    return false;
+    temp = adj[u];
+
+    while (temp != NULL)
+    {
+      int mid = temp->vertex;
+      Node *temp2 = adj[mid];
+
+      while (temp2 != NULL)
+      {
+        if (temp2->vertex == v)
+        {
+          cout << "Indirect path exists.\n";
+          cout << u << " -> " << mid << " -> " << v << endl;
+          cout << "Combined strength = "
+               << temp->weight + temp2->weight << endl;
+          return;
+        }
+
+        temp2 = temp2->next;
+      }
+
+      temp = temp->next;
+    }
+
+    cout << "No path exists.\n";
   }
 
   void displayConnections(int u)
@@ -131,10 +159,7 @@ int main()
       cout << "Enter two airline IDs: ";
       cin >> u >> v;
 
-      if (g.checkPartnership(u, v))
-        cout << "Partnership exists.\n";
-      else
-        cout << "No partnership exists.\n";
+      g.checkPartnership(u, v);
       break;
 
     case 3:
@@ -188,13 +213,24 @@ public:
   {
     if (mat[u][v] != 0)
     {
-      cout << "Partnership exists.\n";
-      cout << "Partnership Strength = " << mat[u][v];
+      cout << "Direct partnership exists.\n";
+      cout << "Strength = " << mat[u][v] << endl;
+      return;
     }
-    else
+
+    for (int mid = 0; mid < n; mid++)
     {
-      cout << "No partnership exists.\n";
+      if (mat[u][mid] != 0 && mat[mid][v] != 0)
+      {
+        cout << "Indirect path exists.\n";
+        cout << u << " -> " << mid << " -> " << v << endl;
+        cout << "Combined strength = "
+             << mat[u][mid] + mat[mid][v] << endl;
+        return;
+      }
     }
+
+    cout << "No path exists.\n";
   }
 
   void displayConnected(int u)
