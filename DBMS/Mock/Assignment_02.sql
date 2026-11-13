@@ -88,9 +88,9 @@ WHERE s.student_id IS NULL;
 -- Outcome: Rohan/Dr. Patel and Manish/Dr. Rao (2 rows).
 SELECT s.student_id, s.student_name, i.instructor_name, i.specialization
 FROM students AS s
-INNER JOIN instructors AS i
-    ON i.instructor_id = s.instructor_id
-WHERE LOWER(i.specialization) = 'computer';
+JOIN instructors AS i
+ON i.instructor_id = s.instructor_id
+WHERE i.specialization = 'computer';
 
 -- 5. Create a view with the number of students whose instructor belongs to Pune.
 -- Outcome: The view contains total_students = 1 (Manish is assigned to Dr. Rao).

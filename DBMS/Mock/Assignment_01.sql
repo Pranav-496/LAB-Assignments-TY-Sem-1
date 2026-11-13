@@ -129,29 +129,19 @@ WHERE o.street = manager.street
 -- 6. Find officers who do not work for TCS.
 -- Expected: Kavita Shah, Rohan Patel, Ananya Iyer, Manish Gupta,
 -- Sneha Nair, Vikram Das, Divya Kumar (7 rows).
-SELECT o.*
-FROM officers AS o
-WHERE NOT EXISTS (
-    SELECT 1
-    FROM placed AS p
-    WHERE p.off_name = o.off_name
-      AND p.company_name = 'TCS'
-);
+select o.off_name from officers o 
+join placed p on o.off_name = p.off_name 
+where company_name <> 'TCS';
 
 -- 7. Find officers who earn more than each officer of Infosys.
 -- Expected: Rahul Singh, Priya Mehta, Manish Gupta, Sneha Nair,
 -- Vikram Das, Divya Kumar (6 rows).
-SELECT p.off_name
-FROM placed AS p
-WHERE p.salary > ALL (
-    SELECT infosys.salary
-    FROM placed AS infosys
-    WHERE infosys.company_name = 'Infosys'
-);
-
+select p.off_name from placed p 
+where p.salary > ALL(select o.salary from placed o where o.company_name = 'Infosys');
 -- 8. Find companies located in every city where Infosys is located.
 -- Expected: Infosys (1 row).
-select company_name from comp where city in (select city from comp where company_name like 'Infosys');
+select company_name from comp 
+where city in (select city from comp where company_name like 'Infosys');
 
 -- 9. Find officers earning more than the average salary at their company.
 -- Expected: Rahul Singh/TCS/50000, Priya Mehta/TCS/60000,
@@ -172,12 +162,13 @@ FROM placed
 GROUP BY company_name
 ORDER BY count(*) desc limit 1;
 --ORDER BY count(*) desc limit 2; --for two companies
+
 -- 11. Find the company or companies with the smallest payroll (including ties).
 -- Expected: Microsoft (payroll 30000; 1 row).
 SELECT company_name
 FROM placed
 GROUP BY company_name
-ORDER BY sum(salary) desc limit 1;
+ORDER BY sum(salary) asc limit 1;
 
 -- 12. Find companies whose average salary is higher than TCS's average salary.
 -- Expected: Amazon (average 42500) and Google (average 70000; 2 rows).
