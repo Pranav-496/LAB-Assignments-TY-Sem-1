@@ -1,6 +1,7 @@
 // Assignment 13: MongoDB CRUD queries
 // Run with mongosh. This script uses its own database and resets its collection.
-
+//sudo service mongod start
+//mongosh
 db = db.getSiblingDB("dbms_assignment13_mock");
 db.library_books.drop();
 db.createCollection("library_books");
