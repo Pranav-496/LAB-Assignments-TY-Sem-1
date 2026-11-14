@@ -61,6 +61,13 @@ The problem description specifies three primary relationships:
   - `Department`: **Partial Participation** (a newly created department can exist before hiring any instructors).
 - **Relational Representation**: Foreign key `dept_id` is embedded inside the `Instructor` table.
 
+> [!NOTE] Design Discussion: Can "BelongsTo" also exist between Student and Department?
+> - **Strict Problem Statement Interpretation**: The problem statement explicitly defines: *"Each instructor belongs to a single department..."* and asks to identify 3 named relationships: `(Enrolls, Teaches, BelongsTo)`. Therefore, in a strict reading of the question sheet, `BelongsTo` specifically designates the `Instructor` $\leftrightarrow$ `Department` connection.
+> - **Realistic / Extended Enterprise Interpretation**: In real-world university databases (such as the standard Silberschatz/Korth database), students typically also have a `BelongsTo` (or `MajorsIn`) relationship with a `Department` with cardinality **$N:1$** (Many students belong to one department). In that case:
+>   - `Student` table would include a foreign key: `dept_id` referencing `Department(dept_id)`.
+>   - This prevents ambiguity when students take interdisciplinary or elective courses from other departments.
+>   - Mentioning this nuance in viva/exams shows strong design depth.
+
 ### 2. `Teaches` (Instructor $\longleftrightarrow$ Course)
 - **Description**: *"Each course is taught by an instructor."* (An instructor can teach multiple courses).
 - **Cardinality Ratio**: **One-to-Many ($1:N$)** from `Instructor` to `Course` (or $N:1$ from `Course` to `Instructor`).
