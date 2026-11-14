@@ -105,7 +105,9 @@ The [`DBMS`](./DBMS) folder contains SQL, PL/pgSQL, Python/MySQL connectivity, a
 | 1          | MySQL                     | Company Database Queries (DDL, DML, Subqueries, Joins)            | [Assignment_01.sql](./DBMS/Mock/Assignment_01.sql)                    |
 | 2          | MySQL                     | College Database Joins (Inner, Left, Right Joins & Views - Set A) | [Assignment_02.sql](./DBMS/Mock/Assignment_02.sql)                    |
 | 3          | MySQL                     | College Database Joins (Inner, Left, Right Joins & Views - Set B) | [Assignment_03.sql](./DBMS/Mock/Assignment_03.sql)                    |
+| 4          | Relational Design & MySQL | University Management System (ER Modeling, 3NF & Schema)          | [Assignment_04.md](./DBMS/Mock/Assignment_04.md) / [SQL](./DBMS/Mock/Assignment_04.sql) |
 | 5          | Relational Design & MySQL | Hospital Management System (ER Modeling, 3NF & Schema)            | [Assignment_05.md](./DBMS/Mock/Assignment_05.md) / [SQL](./DBMS/Mock/Assignment_05.sql) |
+| 6          | Relational Design & MySQL | Online Shopping System (ER Modeling, 3NF & Schema)                | [Assignment_06.md](./DBMS/Mock/Assignment_06.md) / [SQL](./DBMS/Mock/Assignment_06.sql) |
 | 7          | PostgreSQL / PLpgSQL      | Library Fine Calculation Stored Procedure                         | [Assignment_07.sql](./DBMS/Mock/Assignment_07.sql)                    |
 | 8          | PostgreSQL / PLpgSQL | Library Fine Management with Exception Handling                   | [Assignment_08.sql](./DBMS/Mock/Assignment_08.sql) |
 | 9          | PostgreSQL / PLpgSQL | Library Audit System with `BEFORE DELETE` / `UPDATE` Triggers     | [Assignment_09.sql](./DBMS/Mock/Assignment_09.sql) |
