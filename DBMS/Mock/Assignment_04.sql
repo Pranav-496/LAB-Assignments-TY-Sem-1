@@ -73,6 +73,8 @@ CREATE TABLE courses (
 
 -- Entity 4: Student
 -- FD: student_id -> student_name, dob, email, contact_no, admission_year
+-- Optional Extension: If an examiner asks for a direct Student -> Department relationship
+-- (e.g. Major department), you can add: `dept_id INT, FOREIGN KEY (dept_id) REFERENCES departments(dept_id)`.
 CREATE TABLE students (
     student_id INT PRIMARY KEY,
     student_name VARCHAR(100) NOT NULL,
