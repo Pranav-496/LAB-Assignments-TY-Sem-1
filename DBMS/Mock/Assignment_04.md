@@ -1,6 +1,7 @@
 # Problem Statement 04: University Management System
 
 ## Problem Description
+
 A university wants to manage information about its students, courses, instructors, and departments. Each student can enroll in multiple courses, and each course can have many students. Each course is taught by an instructor. Each instructor belongs to a single department, but a department can have multiple instructors. For each enrollment, the university wants to record the grade obtained by the student.
 
 ---
@@ -9,12 +10,12 @@ A university wants to manage information about its students, courses, instructor
 
 ### 1. Entity Sets
 
-| Entity | Type | Description | Primary Key (PK) | Other Attributes |
-|---|---|---|---|---|
-| **Department** | Strong Entity | Academic departments offering degree programs and employing instructors | `dept_id` | `dept_name`, `building`, `budget`, `contact_phone` |
-| **Instructor** | Strong Entity | Faculty members teaching academic courses | `instructor_id` | `instructor_name`, `email`, `phone_no`, `salary`, `dept_id` (FK) |
-| **Course** | Strong Entity | Academic subjects/modules offered by the university | `course_id` | `course_title`, `credits`, `instructor_id` (FK) |
-| **Student** | Strong Entity | Individuals studying at the university and enrolling in courses | `student_id` | `student_name`, `dob`, `email`, `contact_no`, `admission_year` |
+| Entity         | Type          | Description                                                             | Primary Key (PK) | Other Attributes                                                 |
+| -------------- | ------------- | ----------------------------------------------------------------------- | ---------------- | ---------------------------------------------------------------- |
+| **Department** | Strong Entity | Academic departments offering degree programs and employing instructors | `dept_id`        | `dept_name`, `building`, `budget`, `contact_phone`               |
+| **Instructor** | Strong Entity | Faculty members teaching academic courses                               | `instructor_id`  | `instructor_name`, `email`, `phone_no`, `salary`, `dept_id` (FK) |
+| **Course**     | Strong Entity | Academic subjects/modules offered by the university                     | `course_id`      | `course_title`, `credits`, `instructor_id` (FK)                  |
+| **Student**    | Strong Entity | Individuals studying at the university and enrolling in courses         | `student_id`     | `student_name`, `dob`, `email`, `contact_no`, `admission_year`   |
 
 ### 2. Attribute Classification
 
@@ -54,7 +55,8 @@ A university wants to manage information about its students, courses, instructor
 The problem description specifies three primary relationships:
 
 ### 1. `BelongsTo` (Instructor $\longleftrightarrow$ Department)
-- **Description**: *"Each instructor belongs to a single department, but a department can have multiple instructors."*
+
+- **Description**: _"Each instructor belongs to a single department, but a department can have multiple instructors."_
 - **Cardinality Ratio**: **Many-to-One ($N:1$)** from `Instructor` to `Department` (or $1:N$ from `Department` to `Instructor`).
 - **Participation Constraints**:
   - `Instructor`: **Total Participation** (every instructor must be affiliated with exactly one department).
@@ -62,14 +64,16 @@ The problem description specifies three primary relationships:
 - **Relational Representation**: Foreign key `dept_id` is embedded inside the `Instructor` table.
 
 > [!NOTE] Design Discussion: Can "BelongsTo" also exist between Student and Department?
-> - **Strict Problem Statement Interpretation**: The problem statement explicitly defines: *"Each instructor belongs to a single department..."* and asks to identify 3 named relationships: `(Enrolls, Teaches, BelongsTo)`. Therefore, in a strict reading of the question sheet, `BelongsTo` specifically designates the `Instructor` $\leftrightarrow$ `Department` connection.
+>
+> - **Strict Problem Statement Interpretation**: The problem statement explicitly defines: _"Each instructor belongs to a single department..."_ and asks to identify 3 named relationships: `(Enrolls, Teaches, BelongsTo)`. Therefore, in a strict reading of the question sheet, `BelongsTo` specifically designates the `Instructor` $\leftrightarrow$ `Department` connection.
 > - **Realistic / Extended Enterprise Interpretation**: In real-world university databases (such as the standard Silberschatz/Korth database), students typically also have a `BelongsTo` (or `MajorsIn`) relationship with a `Department` with cardinality **$N:1$** (Many students belong to one department). In that case:
 >   - `Student` table would include a foreign key: `dept_id` referencing `Department(dept_id)`.
 >   - This prevents ambiguity when students take interdisciplinary or elective courses from other departments.
 >   - Mentioning this nuance in viva/exams shows strong design depth.
 
 ### 2. `Teaches` (Instructor $\longleftrightarrow$ Course)
-- **Description**: *"Each course is taught by an instructor."* (An instructor can teach multiple courses).
+
+- **Description**: _"Each course is taught by an instructor."_ (An instructor can teach multiple courses).
 - **Cardinality Ratio**: **One-to-Many ($1:N$)** from `Instructor` to `Course` (or $N:1$ from `Course` to `Instructor`).
 - **Participation Constraints**:
   - `Course`: **Total Participation** (every course offered has an assigned instructor).
@@ -77,75 +81,30 @@ The problem description specifies three primary relationships:
 - **Relational Representation**: Foreign key `instructor_id` is embedded inside the `Course` table.
 
 ### 3. `Enrolls` (Student $\longleftrightarrow$ Course)
-- **Description**: *"Each student can enroll in multiple courses, and each course can have many students. For each enrollment, the university wants to record the grade obtained by the student."*
+
+- **Description**: _"Each student can enroll in multiple courses, and each course can have many students. For each enrollment, the university wants to record the grade obtained by the student."_
 - **Cardinality Ratio**: **Many-to-Many ($M:N$)**.
 - **Participation Constraints**:
   - `Student`: **Partial / Total Participation** (a registered student enrolls in 1 or more courses).
   - `Course`: **Partial Participation** (a course can have 0 or more enrolled students).
-- **Descriptive Attribute**: **`grade`** (*explicitly required by problem statement*), `enrollment_date`.
+- **Descriptive Attribute**: **`grade`** (_explicitly required by problem statement_), `enrollment_date`.
 - **Relational Representation**: Decomposed into a separate junction table `Enrollment` / `Student_Course` (`student_id`, `course_id`, `grade`).
 
 ### Summary Cardinality Matrix
 
-| Relationship | Entity 1 | Entity 2 | Cardinality | Participation (E1) | Participation (E2) | Relationship Attribute(s) |
-|---|---|---|---|---|---|---|
-| **BelongsTo** | Instructor | Department | $N:1$ | Total | Partial | — |
-| **Teaches** | Instructor | Course | $1:N$ | Partial | Total | — |
-| **Enrolls** | Student | Course | $M:N$ | Total / Partial | Partial | **`grade`**, `enrollment_date` |
+| Relationship  | Entity 1   | Entity 2   | Cardinality | Participation (E1) | Participation (E2) | Relationship Attribute(s)      |
+| ------------- | ---------- | ---------- | ----------- | ------------------ | ------------------ | ------------------------------ |
+| **BelongsTo** | Instructor | Department | $N:1$       | Total              | Partial            | —                              |
+| **Teaches**   | Instructor | Course     | $1:N$       | Partial            | Total              | —                              |
+| **Enrolls**   | Student    | Course     | $M:N$       | Total / Partial    | Partial            | **`grade`**, `enrollment_date` |
 
 ---
 
 ## Task 3: Entity-Relationship (ER) Diagram
 
-### Mermaid ER Diagram
+### Visual ER Diagram
 
-```mermaid
-erDiagram
-    DEPARTMENT ||--o{ INSTRUCTOR : "employs / BelongsTo (1:N)"
-    INSTRUCTOR ||--o{ COURSE : "Teaches (1:N)"
-    STUDENT ||--o{ ENROLLMENT : "registers in (1:N)"
-    COURSE ||--o{ ENROLLMENT : "has enrollments (1:N)"
-
-    DEPARTMENT {
-        int dept_id PK
-        string dept_name
-        string building
-        decimal budget
-        string contact_phone
-    }
-
-    INSTRUCTOR {
-        int instructor_id PK
-        string instructor_name
-        string email
-        string phone_no
-        decimal salary
-        int dept_id FK
-    }
-
-    COURSE {
-        string course_id PK
-        string course_title
-        int credits
-        int instructor_id FK
-    }
-
-    STUDENT {
-        int student_id PK
-        string student_name
-        date dob
-        string email
-        string contact_no
-        int admission_year
-    }
-
-    ENROLLMENT {
-        int student_id PK, FK
-        string course_id PK, FK
-        string grade
-        date enrollment_date
-    }
-```
+![University Management System ER Diagram](./University_Management_System.png)
 
 ### Text / Chen-Style Representation
 
@@ -200,19 +159,20 @@ Applying the standard ER-to-Relational Mapping rules:
 ### Relational Schema
 
 1. **`Department`** (<u>`dept_id`</u>, `dept_name`, `building`, `budget`, `contact_phone`)
-2. **`Instructor`** (<u>`instructor_id`</u>, `instructor_name`, `email`, `phone_no`, `salary`, `dept_id`*)  
-   *(Foreign Key: `dept_id` references `Department(dept_id)`)*
-3. **`Course`** (<u>`course_id`</u>, `course_title`, `credits`, `instructor_id`*)  
-   *(Foreign Key: `instructor_id` references `Instructor(instructor_id)`)*
+2. **`Instructor`** (<u>`instructor_id`</u>, `instructor_name`, `email`, `phone_no`, `salary`, `dept_id`_)  
+   _(Foreign Key: `dept_id` references `Department(dept_id)`)\*
+3. **`Course`** (<u>`course_id`</u>, `course_title`, `credits`, `instructor_id`_)  
+   _(Foreign Key: `instructor_id` references `Instructor(instructor_id)`)\*
 4. **`Student`** (<u>`student_id`</u>, `student_name`, `dob`, `email`, `contact_no`, `admission_year`)
-5. **`Enrollment`** (<u>`student_id`*</u>, <u>`course_id`*</u>, `grade`, `enrollment_date`)  
-   *(Foreign Keys: `student_id` references `Student(student_id)`, `course_id` references `Course(course_id)`)*
+5. **`Enrollment`** (<u>`student_id`_</u>, <u>`course_id`_</u>, `grade`, `enrollment_date`)  
+   _(Foreign Keys: `student_id` references `Student(student_id)`, `course_id` references `Course(course_id)`)_
 
 ---
 
 ## Task 5: Normalization up to 3NF
 
 ### Functional Dependencies (FDs)
+
 1. `dept_id` $\rightarrow$ `dept_name`, `building`, `budget`, `contact_phone`
 2. `instructor_id` $\rightarrow$ `instructor_name`, `email`, `phone_no`, `salary`, `dept_id`
 3. `course_id` $\rightarrow$ `course_title`, `credits`, `instructor_id`
@@ -224,7 +184,9 @@ Applying the standard ER-to-Relational Mapping rules:
 ### Step-by-Step Normalization Process
 
 #### 1. Unnormalized Form (UNF)
+
 In a denormalized single flat table, a university record stores repeating groups of courses, instructors, and departments under students:
+
 ```text
 University_Record (
     student_id, student_name, dob, email, contact_no, admission_year,
@@ -233,15 +195,18 @@ University_Record (
       dept_id, dept_name, building, budget }
 )
 ```
+
 - **Anomalies in UNF**: High redundancy, insertion anomaly (cannot add an instructor or department without student enrollment), deletion anomaly (deregistering a student removes course/instructor information).
 
 ---
 
 #### 2. First Normal Form (1NF)
+
 > **Definition**: A relation is in 1NF if and only if all attribute values are atomic and there are no repeating groups.
 
 - **Action**: Flatten repeating groups so each tuple contains atomic values.
 - Primary Key of flattened relation: `(student_id, course_id)`:
+
 ```text
 Flat_University_1NF (
     student_id, course_id,
@@ -251,17 +216,19 @@ Flat_University_1NF (
     dept_id, dept_name, building, budget
 )
 ```
+
 - **Problem**: Non-prime attributes depend only on a part of the composite primary key (violates 2NF).
 
 ---
 
 #### 3. Second Normal Form (2NF)
+
 > **Definition**: A relation is in 2NF if and only if it is in 1NF and no non-prime attribute is partially dependent on any candidate key.
 
 - **Identified Partial Dependencies**:
-  - `student_id` $\rightarrow$ `student_name`, `dob`, `email`, `contact_no`, `admission_year` *(Depends only on `student_id`)*
-  - `course_id` $\rightarrow$ `course_title`, `credits`, `instructor_id`, `instructor_name`, `instructor_email`, `salary`, `dept_id`, `dept_name`, `building`, `budget` *(Depends only on `course_id`)*
-  - `(student_id, course_id)` $\rightarrow$ `grade`, `enrollment_date` *(Fully functionally dependent)*
+  - `student_id` $\rightarrow$ `student_name`, `dob`, `email`, `contact_no`, `admission_year` _(Depends only on `student_id`)_
+  - `course_id` $\rightarrow$ `course_title`, `credits`, `instructor_id`, `instructor_name`, `instructor_email`, `salary`, `dept_id`, `dept_name`, `building`, `budget` _(Depends only on `course_id`)_
+  - `(student_id, course_id)` $\rightarrow$ `grade`, `enrollment_date` _(Fully functionally dependent)_
 
 - **Decomposition to achieve 2NF**:
   1. `Student` (<u>`student_id`</u>, `student_name`, `dob`, `email`, `contact_no`, `admission_year`)
@@ -273,6 +240,7 @@ All partial dependencies are removed. All three tables are now in **2NF**.
 ---
 
 #### 4. Third Normal Form (3NF)
+
 > **Definition**: A relation is in 3NF if and only if it is in 2NF and no non-prime attribute is transitively dependent on any candidate key.
 
 - **Inspecting Transitive Dependencies in `Course_Instructor_Dept`**:
@@ -291,10 +259,10 @@ All partial dependencies are removed. All three tables are now in **2NF**.
      - Columns: (<u>`dept_id`</u>, `dept_name`, `building`, `budget`, `contact_phone`)
      - FD: `dept_id` $\rightarrow$ `dept_name`, `building`, `budget`, `contact_phone`. Superkey: `dept_id` $\implies$ **3NF**.
   2. **`Instructor`**:
-     - Columns: (<u>`instructor_id`</u>, `instructor_name`, `email`, `phone_no`, `salary`, `dept_id`*)
+     - Columns: (<u>`instructor_id`</u>, `instructor_name`, `email`, `phone_no`, `salary`, `dept_id`\*)
      - FD: `instructor_id` $\rightarrow$ `instructor_name`, `email`, `phone_no`, `salary`, `dept_id`. Superkey: `instructor_id` $\implies$ **3NF**.
   3. **`Course`**:
-     - Columns: (<u>`course_id`</u>, `course_title`, `credits`, `instructor_id`*)
+     - Columns: (<u>`course_id`</u>, `course_title`, `credits`, `instructor_id`\*)
      - FD: `course_id` $\rightarrow$ `course_title`, `credits`, `instructor_id`. Superkey: `course_id` $\implies$ **3NF**.
 
 - **Verifying all relations in 3NF**:
@@ -305,15 +273,15 @@ All partial dependencies are removed. All three tables are now in **2NF**.
 
 ### Final 3NF Normalized Schema Summary
 
-| Table Name | Primary Key | Foreign Keys | Non-Key Attributes | Normal Form |
-|---|---|---|---|---|
-| **Department** | `dept_id` | None | `dept_name`, `building`, `budget`, `contact_phone` | **3NF / BCNF** |
-| **Instructor** | `instructor_id` | `dept_id` $\rightarrow$ `Department(dept_id)` | `instructor_name`, `email`, `phone_no`, `salary` | **3NF / BCNF** |
-| **Course** | `course_id` | `instructor_id` $\rightarrow$ `Instructor(instructor_id)` | `course_title`, `credits` | **3NF / BCNF** |
-| **Student** | `student_id` | None | `student_name`, `dob`, `email`, `contact_no`, `admission_year` | **3NF / BCNF** |
-| **Enrollment** | `(student_id, course_id)` | `student_id` $\rightarrow$ `Student`, `course_id` $\rightarrow$ `Course` | `grade`, `enrollment_date` | **3NF / BCNF** |
+| Table Name     | Primary Key               | Foreign Keys                                                             | Non-Key Attributes                                             | Normal Form    |
+| -------------- | ------------------------- | ------------------------------------------------------------------------ | -------------------------------------------------------------- | -------------- |
+| **Department** | `dept_id`                 | None                                                                     | `dept_name`, `building`, `budget`, `contact_phone`             | **3NF / BCNF** |
+| **Instructor** | `instructor_id`           | `dept_id` $\rightarrow$ `Department(dept_id)`                            | `instructor_name`, `email`, `phone_no`, `salary`               | **3NF / BCNF** |
+| **Course**     | `course_id`               | `instructor_id` $\rightarrow$ `Instructor(instructor_id)`                | `course_title`, `credits`                                      | **3NF / BCNF** |
+| **Student**    | `student_id`              | None                                                                     | `student_name`, `dob`, `email`, `contact_no`, `admission_year` | **3NF / BCNF** |
+| **Enrollment** | `(student_id, course_id)` | `student_id` $\rightarrow$ `Student`, `course_id` $\rightarrow$ `Course` | `grade`, `enrollment_date`                                     | **3NF / BCNF** |
 
 **Guarantees:**
+
 1. **Lossless Join**: Maintained across all decomposition steps.
 2. **Dependency Preservation**: All functional dependencies are preserved within their corresponding relations.
-

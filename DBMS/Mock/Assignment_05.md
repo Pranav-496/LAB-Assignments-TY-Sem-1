@@ -1,6 +1,7 @@
 # Problem Statement 05: Hospital Management System
 
 ## Problem Description
+
 A hospital wants to track patients, doctors, wards, and treatments. Each patient is admitted to a ward, and a ward can have multiple patients. Doctors can be assigned to multiple patients, and a patient can have multiple doctors. Each patient can undergo multiple treatments, and the hospital wants to store the treatment date for each treatment.
 
 ---
@@ -9,12 +10,12 @@ A hospital wants to track patients, doctors, wards, and treatments. Each patient
 
 ### 1. Entity Sets
 
-| Entity | Type | Description | Primary Key (PK) | Other Attributes |
-|---|---|---|---|---|
-| **Patient** | Strong Entity | Individuals admitted to the hospital receiving medical care | `patient_id` | `patient_name`, `dob`, `gender`, `contact_no`, `address`, `admission_date`, `ward_id` (FK) |
-| **Doctor** | Strong Entity | Medical specialists and physicians working in the hospital | `doctor_id` | `doctor_name`, `specialization`, `phone_no`, `email` |
-| **Ward** | Strong Entity | Hospital wards/rooms accommodating admitted patients | `ward_id` | `ward_name`, `ward_type`, `capacity` |
-| **Treatment** | Strong Entity | Medical procedures, tests, or therapies provided | `treatment_id` | `treatment_name`, `description`, `cost` |
+| Entity        | Type          | Description                                                 | Primary Key (PK) | Other Attributes                                                                           |
+| ------------- | ------------- | ----------------------------------------------------------- | ---------------- | ------------------------------------------------------------------------------------------ |
+| **Patient**   | Strong Entity | Individuals admitted to the hospital receiving medical care | `patient_id`     | `patient_name`, `dob`, `gender`, `contact_no`, `address`, `admission_date`, `ward_id` (FK) |
+| **Doctor**    | Strong Entity | Medical specialists and physicians working in the hospital  | `doctor_id`      | `doctor_name`, `specialization`, `phone_no`, `email`                                       |
+| **Ward**      | Strong Entity | Hospital wards/rooms accommodating admitted patients        | `ward_id`        | `ward_name`, `ward_type`, `capacity`                                                       |
+| **Treatment** | Strong Entity | Medical procedures, tests, or therapies provided            | `treatment_id`   | `treatment_name`, `description`, `cost`                                                    |
 
 ### 2. Attribute Classification
 
@@ -54,6 +55,7 @@ A hospital wants to track patients, doctors, wards, and treatments. Each patient
 The problem description specifies three primary relationships:
 
 ### 1. `AdmittedTo` (Patient $\longleftrightarrow$ Ward)
+
 - **Description**: Each patient is admitted to exactly one ward, while a ward can accommodate multiple patients.
 - **Cardinality Ratio**: **Many-to-One ($N:1$)** from `Patient` to `Ward` (or $1:N$ from `Ward` to `Patient`).
 - **Participation Constraints**:
@@ -62,6 +64,7 @@ The problem description specifies three primary relationships:
 - **Relational Representation**: Foreign key `ward_id` is placed inside the `Patient` relation.
 
 ### 2. `Assigned` (Doctor $\longleftrightarrow$ Patient)
+
 - **Description**: Doctors can be assigned to multiple patients, and a patient can have multiple doctors attending them.
 - **Cardinality Ratio**: **Many-to-Many ($M:N$)**.
 - **Participation Constraints**:
@@ -71,81 +74,30 @@ The problem description specifies three primary relationships:
 - **Relational Representation**: Decomposed into a separate junction table `Doctor_Patient` (`doctor_id`, `patient_id`).
 
 ### 3. `Undergoes` (Patient $\longleftrightarrow$ Treatment)
+
 - **Description**: A patient can undergo multiple treatments, and a treatment can be administered to multiple patients over time.
 - **Cardinality Ratio**: **Many-to-Many ($M:N$)**.
 - **Participation Constraints**:
   - `Patient`: **Partial Participation** (a patient might not have undergone any treatment yet).
   - `Treatment`: **Partial Participation** (a treatment catalog entry exists before being administered to any patient).
-- **Descriptive Attributes**: **`treatment_date`** (*explicitly required by problem statement*), `remarks`.
+- **Descriptive Attributes**: **`treatment_date`** (_explicitly required by problem statement_), `remarks`.
 - **Relational Representation**: Decomposed into a separate junction table `Patient_Treatment` (`patient_id`, `treatment_id`, `treatment_date`).
 
 ### Summary Cardinality Matrix
 
-| Relationship | Entity 1 | Entity 2 | Cardinality | Participation (E1) | Participation (E2) | Relationship Attribute(s) |
-|---|---|---|---|---|---|---|
-| **AdmittedTo** | Patient | Ward | $N:1$ | Total | Partial | — |
-| **Assigned** | Doctor | Patient | $M:N$ | Partial | Total / Partial | `assignment_date` |
-| **Undergoes** | Patient | Treatment | $M:N$ | Partial | Partial | `treatment_date`, `remarks` |
+| Relationship   | Entity 1 | Entity 2  | Cardinality | Participation (E1) | Participation (E2) | Relationship Attribute(s)   |
+| -------------- | -------- | --------- | ----------- | ------------------ | ------------------ | --------------------------- |
+| **AdmittedTo** | Patient  | Ward      | $N:1$       | Total              | Partial            | —                           |
+| **Assigned**   | Doctor   | Patient   | $M:N$       | Partial            | Total / Partial    | `assignment_date`           |
+| **Undergoes**  | Patient  | Treatment | $M:N$       | Partial            | Partial            | `treatment_date`, `remarks` |
 
 ---
 
 ## Task 3: Entity-Relationship (ER) Diagram
 
-### Mermaid ER Diagram
+### Visual ER Diagram
 
-```mermaid
-erDiagram
-    WARD ||--o{ PATIENT : "admits (1:N)"
-    DOCTOR }o--o{ PATIENT : "assigned to (M:N)"
-    PATIENT ||--o{ PATIENT_TREATMENT : "undergoes (1:N)"
-    TREATMENT ||--o{ PATIENT_TREATMENT : "prescribed in (1:N)"
-
-    WARD {
-        int ward_id PK
-        string ward_name
-        string ward_type
-        int capacity
-    }
-
-    PATIENT {
-        int patient_id PK
-        string patient_name
-        date dob
-        string gender
-        string contact_no
-        string address
-        date admission_date
-        int ward_id FK
-    }
-
-    DOCTOR {
-        int doctor_id PK
-        string doctor_name
-        string specialization
-        string phone_no
-        string email
-    }
-
-    TREATMENT {
-        int treatment_id PK
-        string treatment_name
-        string description
-        decimal cost
-    }
-
-    DOCTOR_PATIENT {
-        int doctor_id PK, FK
-        int patient_id PK, FK
-        date assignment_date
-    }
-
-    PATIENT_TREATMENT {
-        int patient_id PK, FK
-        int treatment_id PK, FK
-        date treatment_date PK
-        string remarks
-    }
-```
+![Hospital Management System ER Diagram](./Hospital_Management_System.png)
 
 ### Text / Chen-Style Representation
 
@@ -189,21 +141,23 @@ Applying the standard ER-to-Relational Mapping rules:
 ### Relational Schema
 
 1. **`Ward`** (<u>`ward_id`</u>, `ward_name`, `ward_type`, `capacity`)
-2. **`Patient`** (<u>`patient_id`</u>, `patient_name`, `dob`, `gender`, `contact_no`, `address`, `admission_date`, `ward_id`*)  
-   *(Foreign Key: `ward_id` references `Ward(ward_id)`)*
+2. **`Patient`** (<u>`patient_id`</u>, `patient_name`, `dob`, `gender`, `contact_no`, `address`, `admission_date`, `ward_id`_)  
+   _(Foreign Key: `ward_id` references `Ward(ward_id)`)\*
 3. **`Doctor`** (<u>`doctor_id`</u>, `doctor_name`, `specialization`, `phone_no`, `email`)
 4. **`Treatment`** (<u>`treatment_id`</u>, `treatment_name`, `description`, `cost`)
-5. **`Doctor_Patient`** (<u>`doctor_id`*</u>, <u>`patient_id`*</u>, `assignment_date`)  
-   *(Foreign Keys: `doctor_id` references `Doctor(doctor_id)`, `patient_id` references `Patient(patient_id)`)*
-6. **`Patient_Treatment`** (<u>`patient_id`*</u>, <u>`treatment_id`*</u>, <u>`treatment_date`</u>, `remarks`)  
-   *(Foreign Keys: `patient_id` references `Patient(patient_id)`, `treatment_id` references `Treatment(treatment_id)`)*
+5. **`Doctor_Patient`** (<u>`doctor_id`_</u>, <u>`patient_id`_</u>, `assignment_date`)  
+   _(Foreign Keys: `doctor_id` references `Doctor(doctor_id)`, `patient_id` references `Patient(patient_id)`)_
+6. **`Patient_Treatment`** (<u>`patient_id`_</u>, <u>`treatment_id`_</u>, <u>`treatment_date`</u>, `remarks`)  
+   _(Foreign Keys: `patient_id` references `Patient(patient_id)`, `treatment_id` references `Treatment(treatment_id)`)_
 
 ---
 
 ## Task 5: Normalize the Relational Tables up to 3NF
 
 ### Functional Dependencies (FDs)
+
 From the business rules of the hospital:
+
 1. `ward_id` $\rightarrow$ `ward_name`, `ward_type`, `capacity`
 2. `doctor_id` $\rightarrow$ `doctor_name`, `specialization`, `phone_no`, `email`
 3. `treatment_id` $\rightarrow$ `treatment_name`, `description`, `cost`
@@ -216,7 +170,9 @@ From the business rules of the hospital:
 ### Step-by-Step Normalization
 
 #### 1. Unnormalized Form (UNF)
+
 In an unnormalized flat record, a single patient row holds multiple doctors and multiple treatments as repeating groups:
+
 ```text
 Hospital_Record (
     patient_id, patient_name, dob, gender, contact_no, address, admission_date,
@@ -225,15 +181,18 @@ Hospital_Record (
     { treatment_id, treatment_name, description, cost, treatment_date, remarks }
 )
 ```
+
 - **Anomalies in UNF**: High data redundancy, insertion anomaly (cannot add a ward/doctor without a patient), update anomaly (inconsistent doctor names across rows), deletion anomaly (discharging a patient deletes ward or doctor records).
 
 ---
 
 #### 2. First Normal Form (1NF)
+
 > **Definition**: A relation is in 1NF if and only if all attribute domains contain only atomic (indivisible) values and there are no repeating groups.
 
 - **Action**: Flatten the repeating groups so each cell holds a single atomic value.
 - The flattened relation has a composite primary key: `(patient_id, doctor_id, treatment_id, treatment_date)`:
+
 ```text
 Flat_Hospital_1NF (
     patient_id, doctor_id, treatment_id, treatment_date,
@@ -243,20 +202,22 @@ Flat_Hospital_1NF (
     treatment_name, description, cost, remarks
 )
 ```
+
 - **Problem**: In this relation, many non-prime attributes depend only on a part of the composite primary key.
 
 ---
 
 #### 3. Second Normal Form (2NF)
+
 > **Definition**: A relation is in 2NF if and only if it is in 1NF and every non-prime attribute is **fully functionally dependent** on the whole candidate key (i.e., **no partial dependencies**).
 
 - **Identified Partial Dependencies**:
   - `patient_id` $\rightarrow$ `patient_name`, `dob`, `gender`, `contact_no`, `address`, `admission_date`, `ward_id`, `ward_name`, `ward_type`, `capacity`  
-    *(Depends only on part of key `patient_id`)*
+    _(Depends only on part of key `patient_id`)_
   - `doctor_id` $\rightarrow$ `doctor_name`, `specialization`, `phone_no`, `email`  
-    *(Depends only on part of key `doctor_id`)*
+    _(Depends only on part of key `doctor_id`)_
   - `treatment_id` $\rightarrow$ `treatment_name`, `description`, `cost`  
-    *(Depends only on part of key `treatment_id`)*
+    _(Depends only on part of key `treatment_id`)_
   - `(doctor_id, patient_id)` $\rightarrow$ `assignment_date`
   - `(patient_id, treatment_id, treatment_date)` $\rightarrow$ `remarks`
 
@@ -272,6 +233,7 @@ All relations are now free of partial dependencies and therefore in **2NF**.
 ---
 
 #### 4. Third Normal Form (3NF)
+
 > **Definition**: A relation is in 3NF if and only if it is in 2NF and **no non-prime attribute is transitively dependent on any candidate key** (i.e., for every non-trivial functional dependency $X \rightarrow Y$, $X$ is a superkey or $Y$ is a prime attribute).
 
 - **Inspecting Transitive Dependencies**:
@@ -289,7 +251,7 @@ All relations are now free of partial dependencies and therefore in **2NF**.
      - FD: `ward_id` $\rightarrow$ `ward_name`, `ward_type`, `capacity`.
      - `ward_id` is the superkey $\implies$ **In 3NF**.
   2. **`Patient`**:
-     - Columns: (<u>`patient_id`</u>, `patient_name`, `dob`, `gender`, `contact_no`, `address`, `admission_date`, `ward_id`*)
+     - Columns: (<u>`patient_id`</u>, `patient_name`, `dob`, `gender`, `contact_no`, `address`, `admission_date`, `ward_id`\*)
      - FD: `patient_id` $\rightarrow$ `patient_name`, `dob`, `gender`, `contact_no`, `address`, `admission_date`, `ward_id`.
      - `patient_id` is the superkey $\implies$ **In 3NF**.
 
@@ -303,16 +265,16 @@ All relations are now free of partial dependencies and therefore in **2NF**.
 
 ### Final 3NF Normalized Schema Summary
 
-| Table Name | Primary Key | Foreign Keys | Non-Key Attributes | Normal Form |
-|---|---|---|---|---|
-| **Ward** | `ward_id` | None | `ward_name`, `ward_type`, `capacity` | **3NF / BCNF** |
-| **Patient** | `patient_id` | `ward_id` $\rightarrow$ `Ward(ward_id)` | `patient_name`, `dob`, `gender`, `contact_no`, `address`, `admission_date` | **3NF / BCNF** |
-| **Doctor** | `doctor_id` | None | `doctor_name`, `specialization`, `phone_no`, `email` | **3NF / BCNF** |
-| **Treatment** | `treatment_id` | None | `treatment_name`, `description`, `cost` | **3NF / BCNF** |
-| **Doctor_Patient** | `(doctor_id, patient_id)` | `doctor_id` $\rightarrow$ `Doctor`, `patient_id` $\rightarrow$ `Patient` | `assignment_date` | **3NF / BCNF** |
-| **Patient_Treatment** | `(patient_id, treatment_id, treatment_date)` | `patient_id` $\rightarrow$ `Patient`, `treatment_id` $\rightarrow$ `Treatment` | `remarks` | **3NF / BCNF** |
+| Table Name            | Primary Key                                  | Foreign Keys                                                                   | Non-Key Attributes                                                         | Normal Form    |
+| --------------------- | -------------------------------------------- | ------------------------------------------------------------------------------ | -------------------------------------------------------------------------- | -------------- |
+| **Ward**              | `ward_id`                                    | None                                                                           | `ward_name`, `ward_type`, `capacity`                                       | **3NF / BCNF** |
+| **Patient**           | `patient_id`                                 | `ward_id` $\rightarrow$ `Ward(ward_id)`                                        | `patient_name`, `dob`, `gender`, `contact_no`, `address`, `admission_date` | **3NF / BCNF** |
+| **Doctor**            | `doctor_id`                                  | None                                                                           | `doctor_name`, `specialization`, `phone_no`, `email`                       | **3NF / BCNF** |
+| **Treatment**         | `treatment_id`                               | None                                                                           | `treatment_name`, `description`, `cost`                                    | **3NF / BCNF** |
+| **Doctor_Patient**    | `(doctor_id, patient_id)`                    | `doctor_id` $\rightarrow$ `Doctor`, `patient_id` $\rightarrow$ `Patient`       | `assignment_date`                                                          | **3NF / BCNF** |
+| **Patient_Treatment** | `(patient_id, treatment_id, treatment_date)` | `patient_id` $\rightarrow$ `Patient`, `treatment_id` $\rightarrow$ `Treatment` | `remarks`                                                                  | **3NF / BCNF** |
 
 **Properties of this decomposition:**
+
 1. **Lossless Join Decomposition**: Guaranteed because at each decomposition step, the intersection of schemas forms a candidate key of at least one sub-relation.
 2. **Dependency Preservation**: All identified functional dependencies are preserved within individual decomposed relations.
-
