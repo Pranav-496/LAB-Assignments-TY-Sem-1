@@ -41,15 +41,15 @@ import mysql.connector
 # Connect to MySQL
 con = mysql.connector.connect(
     host="localhost",
-    user="books_user",
+    user="Pranav",
     password="12345"
 )
 
 cur = con.cursor()
 
 # Create database and table
-cur.execute("CREATE DATABASE IF NOT EXISTS dbms_assignment11")
-cur.execute("USE dbms_assignment11")
+cur.execute("CREATE DATABASE IF NOT EXISTS conn")
+cur.execute("USE conn")
 
 cur.execute("""
 CREATE TABLE IF NOT EXISTS Books (

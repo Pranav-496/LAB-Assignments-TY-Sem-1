@@ -22,6 +22,15 @@
 #
 #    If books_user does not exist, create it first:
 #    CREATE USER 'books_user'@'localhost' IDENTIFIED BY '12345';
+
+#    CREATE USER IF NOT EXISTS 'books_user'@'localhost'
+#        IDENTIFIED BY 'your_password_here';
+#    ALTER USER 'books_user'@'localhost'
+#        IDENTIFIED BY 'your_password_here';
+#    GRANT CREATE ON *.* TO 'books_user'@'localhost';
+#    GRANT ALL PRIVILEGES ON dbms_assignment12.* TO 'books_user'@'localhost';
+#    FLUSH PRIVILEGES;
+#    EXIT;
 #
 # 4. Go to the project folder:
 #    cd /mnt/d/LAB-Assignments-TY-Sem-1
