@@ -1,217 +1,150 @@
-# Assignment 12: Python and MySQL Student Management
+
+# Assignment 12: Student Management using Python and MySQL
 #
-# Setup and run this program from the Ubuntu (WSL) terminal, not PowerShell.
+# SETUP INSTRUCTIONS (Run in Ubuntu / WSL terminal):
 #
-# 1. Install MySQL and Python tools if they are not already installed:
+# 1. Install MySQL and Python tools:
 #    sudo apt update
 #    sudo apt install mysql-server python3-pip python3-venv
 #
 # 2. Start MySQL:
 #    sudo service mysql start
 #
-# 3. Give the MySQL user permission to create and use this assignment database.
-#    If you already created books_user for Assignment 11, open MySQL:
+# 3. Give database permissions:
 #    sudo mysql
-#    Then run this SQL at the mysql> prompt:
 #
+#    Run these commands inside MySQL:
 #    GRANT CREATE ON *.* TO 'books_user'@'localhost';
-#    GRANT ALL PRIVILEGES ON dbms_assignment12.* TO 'books_user'@'localhost';
+#    GRANT ALL PRIVILEGES ON dbms_assignment12.*
+#    TO 'books_user'@'localhost';
 #    FLUSH PRIVILEGES;
 #    EXIT;
 #
-#    If you have not created books_user yet, run these commands in MySQL
-#    instead, replacing your_password_here with a password you choose:
+#    If books_user does not exist, create it first:
+#    CREATE USER 'books_user'@'localhost' IDENTIFIED BY '12345';
 #
-#    CREATE USER IF NOT EXISTS 'books_user'@'localhost'
-#        IDENTIFIED BY 'your_password_here';
-#    ALTER USER 'books_user'@'localhost'
-#        IDENTIFIED BY 'your_password_here';
-#    GRANT CREATE ON *.* TO 'books_user'@'localhost';
-#    GRANT ALL PRIVILEGES ON dbms_assignment12.* TO 'books_user'@'localhost';
-#    FLUSH PRIVILEGES;
-#    EXIT;
-#
-#    Set PASSWORD below to the same password. The program creates the
-#    dbms_assignment12 database and Students table automatically.
-#
-# 4. Go to the project folder in Ubuntu:
+# 4. Go to the project folder:
 #    cd /mnt/d/LAB-Assignments-TY-Sem-1
 #
-# 5. Create a Python environment and install the MySQL connector.
-#    These setup commands only need to be done once:
+# 5. Create environment and install connector (one time only):
 #    python3 -m venv ~/dbms-env
 #    source ~/dbms-env/bin/activate
 #    python -m pip install mysql-connector-python
 #
-# 6. Run the program from the project folder with the environment activated:
+# 6. Run the program:
 #    python DBMS/Mock/Assignment_12.py
 #
-#    To run it later, start MySQL, go to the project folder, and activate the
-#    environment again with: source ~/dbms-env/bin/activate
-#
-# Troubleshooting:
-# - Access denied: make sure the MySQL username and password below match.
-# - Can't connect: start MySQL with sudo service mysql start.
-# - No module named 'mysql': activate dbms-env and install the connector.
-#
+# NOTE: Use the same MySQL password in the PASSWORD variable.
+
 import mysql.connector
-from mysql.connector import Error
 
+# Connect to MySQL
+con = mysql.connector.connect(
+    host="localhost",
+    user="books_user",
+    password="12345"
+)
 
-HOST = "localhost"
-USER = "books_user"
-PASSWORD = "ChooseANewPassword"
+cur = con.cursor()
 
+# Create database and table
+cur.execute("CREATE DATABASE IF NOT EXISTS dbms_assignment12")
+cur.execute("USE dbms_assignment12")
 
-def main():
-    connection = None
-    cursor = None
+cur.execute("""
+CREATE TABLE IF NOT EXISTS Students (
+    Student_ID INT PRIMARY KEY,
+    Name VARCHAR(100),
+    City VARCHAR(100),
+    Age INT,
+    Department VARCHAR(100)
+)
+""")
 
-    try:
-        connection = mysql.connector.connect(
-            host=HOST,
-            user=USER,
-            password=PASSWORD,
+# Menu-driven program
+while True:
+    print("\n1. Add Student")
+    print("2. Delete Student")
+    print("3. Edit Student Details")
+    print("4. View All Students")
+    print("5. Search Student by ID")
+    print("6. Exit")
+
+    ch = int(input("Enter your choice: "))
+
+    if ch == 1:
+        id = int(input("Enter Student ID: "))
+        name = input("Enter Name: ")
+        city = input("Enter City: ")
+        age = int(input("Enter Age: "))
+        dept = input("Enter Department: ")
+
+        cur.execute(
+            "INSERT INTO Students VALUES (%s,%s,%s,%s,%s)",
+            (id, name, city, age, dept)
         )
-        cursor = connection.cursor()
+        con.commit()
+        print("Student Added Successfully")
 
-        cursor.execute("CREATE DATABASE IF NOT EXISTS dbms_assignment12")
-        cursor.execute("USE dbms_assignment12")
-        cursor.execute(
-            """
-            CREATE TABLE IF NOT EXISTS Students (
-                Student_ID INT PRIMARY KEY,
-                Name VARCHAR(100) NOT NULL,
-                City VARCHAR(100) NOT NULL,
-                Age INT NOT NULL,
-                Department VARCHAR(100) NOT NULL
+    elif ch == 2:
+        id = int(input("Enter Student ID: "))
+
+        cur.execute("DELETE FROM Students WHERE Student_ID=%s", (id,))
+        con.commit()
+
+        if cur.rowcount > 0:
+            print("Student Deleted Successfully")
+        else:
+            print("Student Not Found")
+
+    elif ch == 3:
+        id = int(input("Enter Student ID: "))
+
+        cur.execute("SELECT * FROM Students WHERE Student_ID=%s", (id,))
+
+        if cur.fetchone():
+            name = input("Enter New Name: ")
+            city = input("Enter New City: ")
+            age = int(input("Enter New Age: "))
+            dept = input("Enter New Department: ")
+
+            cur.execute(
+                "UPDATE Students SET Name=%s, City=%s, Age=%s, Department=%s WHERE Student_ID=%s",
+                (name, city, age, dept, id)
             )
-            """
-        )
+            con.commit()
+            print("Student Updated Successfully")
+        else:
+            print("Student Not Found")
 
-        while True:
-            print(
-                "\n1. Add a new student\n"
-                "2. Delete a student\n"
-                "3. Edit student details\n"
-                "4. View all students\n"
-                "5. Search a student by Student_ID\n"
-                "6. Exit"
-            )
-            choice = input("Choose an option: ").strip()
+    elif ch == 4:
+        cur.execute("SELECT * FROM Students")
+        students = cur.fetchall()
 
-            if choice == "1":
-                student_id = int(input("Student ID: "))
-                name = input("Name: ").strip()
-                city = input("City: ").strip()
-                age = int(input("Age: "))
-                department = input("Department: ").strip()
+        if students:
+            for row in students:
+                print(row)
+        else:
+            print("No Students Found")
 
-                if student_id <= 0 or age < 0:
-                    print("Student ID must be positive and age cannot be negative.")
-                    continue
-                if not name or not city or not department:
-                    print("Name, city, and department cannot be empty.")
-                    continue
+    elif ch == 5:
+        id = int(input("Enter Student ID: "))
 
-                cursor.execute(
-                    "INSERT INTO Students "
-                    "(Student_ID, Name, City, Age, Department) "
-                    "VALUES (%s, %s, %s, %s, %s)",
-                    (student_id, name, city, age, department),
-                )
-                connection.commit()
-                print("Student added.")
+        cur.execute("SELECT * FROM Students WHERE Student_ID=%s", (id,))
+        row = cur.fetchone()
 
-            elif choice == "2":
-                student_id = int(input("Student ID to delete: "))
-                cursor.execute(
-                    "DELETE FROM Students WHERE Student_ID = %s",
-                    (student_id,),
-                )
-                connection.commit()
-                if cursor.rowcount:
-                    print("Student deleted.")
-                else:
-                    print("No student found with that ID.")
+        if row:
+            print(row)
+        else:
+            print("Student Not Found")
 
-            elif choice == "3":
-                student_id = int(input("Student ID to edit: "))
-                name = input("New name: ").strip()
-                city = input("New city: ").strip()
-                age = int(input("New age: "))
-                department = input("New department: ").strip()
+    elif ch == 6:
+        print("Program Exited")
+        break
 
-                if age < 0:
-                    print("Age cannot be negative.")
-                    continue
-                if not name or not city or not department:
-                    print("Name, city, and department cannot be empty.")
-                    continue
+    else:
+        print("Invalid Choice")
 
-                cursor.execute(
-                    "UPDATE Students SET Name = %s, City = %s, Age = %s, "
-                    "Department = %s WHERE Student_ID = %s",
-                    (name, city, age, department, student_id),
-                )
-                connection.commit()
-                if cursor.rowcount:
-                    print("Student details updated.")
-                else:
-                    print("No student found with that ID.")
-
-            elif choice == "4":
-                cursor.execute(
-                    "SELECT Student_ID, Name, City, Age, Department "
-                    "FROM Students ORDER BY Student_ID"
-                )
-                students = cursor.fetchall()
-                if not students:
-                    print("No students found.")
-                else:
-                    for student in students:
-                        print(
-                            f"ID: {student[0]} | Name: {student[1]} | "
-                            f"City: {student[2]} | Age: {student[3]} | "
-                            f"Department: {student[4]}"
-                        )
-
-            elif choice == "5":
-                student_id = int(input("Student ID to search: "))
-                cursor.execute(
-                    "SELECT Student_ID, Name, City, Age, Department "
-                    "FROM Students WHERE Student_ID = %s",
-                    (student_id,),
-                )
-                student = cursor.fetchone()
-                if student:
-                    print(
-                        f"ID: {student[0]} | Name: {student[1]} | "
-                        f"City: {student[2]} | Age: {student[3]} | "
-                        f"Department: {student[4]}"
-                    )
-                else:
-                    print("No student found with that ID.")
-
-            elif choice == "6":
-                print("Goodbye.")
-                break
-
-            else:
-                print("Invalid option. Choose a number from 1 to 6.")
-
-    except ValueError:
-        print("Student ID and age must be whole numbers.")
-    except Error as error:
-        if connection is not None:
-            connection.rollback()
-        print(f"MySQL error: {error}")
-    finally:
-        if cursor is not None:
-            cursor.close()
-        if connection is not None:
-            connection.close()
-
-
-if __name__ == "__main__":
-    main()
+# Close database connection
+cur.close()
+con.close()

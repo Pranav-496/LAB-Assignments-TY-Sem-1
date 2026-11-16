@@ -1,205 +1,146 @@
-# Assignment 11: Python and MySQL Book Management
+
+# Assignment 11: Book Management using Python and MySQL
 #
-# Setup and run this program from the Ubuntu (WSL) terminal, not PowerShell.
+# SETUP INSTRUCTIONS (Run in Ubuntu / WSL terminal):
 #
-# 1. Install MySQL and Python tools if they are not already installed:
+# 1. Install MySQL and Python tools:
 #    sudo apt update
 #    sudo apt install mysql-server python3-pip python3-venv
 #
 # 2. Start MySQL:
 #    sudo service mysql start
 #
-# 3. Create a MySQL user for this assignment:
+# 3. Create MySQL user:
 #    sudo mysql
-#    Then, at the mysql> prompt, run the following SQL. Replace
-#    your_password_here with a password you choose and remember.
 #
+#    Run these commands inside MySQL:
 #    CREATE USER IF NOT EXISTS 'books_user'@'localhost'
-#        IDENTIFIED BY 'your_password_here';
+#    IDENTIFIED BY '12345';
+#
 #    ALTER USER 'books_user'@'localhost'
-#        IDENTIFIED BY 'your_password_here';
+#    IDENTIFIED BY '12345';
+#
 #    GRANT CREATE ON *.* TO 'books_user'@'localhost';
-#    GRANT ALL PRIVILEGES ON dbms_assignment11.* TO 'books_user'@'localhost';
+#    GRANT ALL PRIVILEGES ON dbms_assignment11.*
+#    TO 'books_user'@'localhost';
 #    FLUSH PRIVILEGES;
 #    EXIT;
 #
-#    Use the same password in the PASSWORD setting below. The program creates
-#    the dbms_assignment11 database and Books table automatically.
-#
-# 4. Go to the project folder in Ubuntu:
-#    cd /mnt/d/LAB-Assignments-TY-Sem-1
-#
-# 5. Create a Python environment and install the MySQL connector.
-#    These setup commands only need to be done once:
+# 4. Install MySQL connector:
 #    python3 -m venv ~/dbms-env
 #    source ~/dbms-env/bin/activate
 #    python -m pip install mysql-connector-python
 #
-# 6. Run the program from the project folder with the environment activated:
-#    python DBMS/Mock/Assignment_11.py
+# 5. Run the program:
+#    python Assignment_11.py
 #
-#    To run it later, start MySQL, go to the project folder, and activate the
-#    environment again with: source ~/dbms-env/bin/activate
-#
-# Troubleshooting:
-# - Access denied: make sure the MySQL username and password below match.
-# - Can't connect: start MySQL with sudo service mysql start.
-# - No module named 'mysql': activate dbms-env and install the connector.
-#
+# NOTE: Use the same MySQL password in the PASSWORD variable.
+
 import mysql.connector
-from mysql.connector import Error
 
+# Connect to MySQL
+con = mysql.connector.connect(
+    host="localhost",
+    user="books_user",
+    password="12345"
+)
 
-HOST = "localhost"
-USER = "books_user"
-PASSWORD = "ChooseANewPassword"
+cur = con.cursor()
 
+# Create database and table
+cur.execute("CREATE DATABASE IF NOT EXISTS dbms_assignment11")
+cur.execute("USE dbms_assignment11")
 
-def main():
-    connection = None
-    cursor = None
+cur.execute("""
+CREATE TABLE IF NOT EXISTS Books (
+    Book_ID INT PRIMARY KEY,
+    Title VARCHAR(100),
+    Author VARCHAR(100),
+    Publisher VARCHAR(100),
+    `Count` INT
+)
+""")
 
-    try:
-        connection = mysql.connector.connect(
-            host=HOST,
-            user=USER,
-            password=PASSWORD,
+# Menu-driven program
+while True:
+    print("\n1. Add Book")
+    print("2. Delete Book")
+    print("3. Edit Book Details")
+    print("4. View All Books")
+    print("5. Search Book by ID")
+    print("6. Exit")
+
+    ch = int(input("Enter your choice: "))
+
+    if ch == 1:
+        id = int(input("Enter Book ID: "))
+        title = input("Enter Title: ")
+        author = input("Enter Author: ")
+        publisher = input("Enter Publisher: ")
+        count = int(input("Enter Count: "))
+
+        cur.execute(
+            "INSERT INTO Books VALUES (%s,%s,%s,%s,%s)",
+            (id, title, author, publisher, count)
         )
-        cursor = connection.cursor()
+        con.commit()
+        print("Book Added Successfully")
 
-        cursor.execute("CREATE DATABASE IF NOT EXISTS dbms_assignment11")
-        cursor.execute("USE dbms_assignment11")
-        cursor.execute(
-            """
-            CREATE TABLE IF NOT EXISTS Books (
-                Book_ID INT PRIMARY KEY,
-                Title VARCHAR(100) NOT NULL,
-                Author VARCHAR(100) NOT NULL,
-                Publisher VARCHAR(100) NOT NULL,
-                `Count` INT NOT NULL
+    elif ch == 2:
+        id = int(input("Enter Book ID: "))
+
+        cur.execute("DELETE FROM Books WHERE Book_ID=%s", (id,))
+        con.commit()
+
+        if cur.rowcount > 0:
+            print("Book Deleted Successfully")
+        else:
+            print("Book Not Found")
+
+    elif ch == 3:
+        id = int(input("Enter Book ID: "))
+
+        cur.execute("SELECT * FROM Books WHERE Book_ID=%s", (id,))
+
+        if cur.fetchone():
+            title = input("Enter New Title: ")
+            author = input("Enter New Author: ")
+            publisher = input("Enter New Publisher: ")
+            count = int(input("Enter New Count: "))
+
+            cur.execute(
+                "UPDATE Books SET Title=%s, Author=%s, Publisher=%s, `Count`=%s WHERE Book_ID=%s",
+                (title, author, publisher, count, id)
             )
-            """
-        )
+            con.commit()
+            print("Book Updated Successfully")
+        else:
+            print("Book Not Found")
 
-        while True:
-            print(
-                "\n1. Add a new book\n"
-                "2. Delete a book\n"
-                "3. Edit book details\n"
-                "4. View all books\n"
-                "5. Search a book by Book_ID\n"
-                "6. Exit"
-            )
-            choice = input("Choose an option: ").strip()
+    elif ch == 4:
+        cur.execute("SELECT * FROM Books")
 
-            if choice == "1":
-                book_id = int(input("Book ID: "))
-                title = input("Title: ").strip()
-                author = input("Author: ").strip()
-                publisher = input("Publisher: ").strip()
-                count = int(input("Number of copies: "))
+        for row in cur.fetchall():
+            print(row)
 
-                if book_id <= 0 or count < 0:
-                    print("Book ID must be positive and copies cannot be negative.")
-                    continue
-                if not title or not author or not publisher:
-                    print("Title, author, and publisher cannot be empty.")
-                    continue
+    elif ch == 5:
+        id = int(input("Enter Book ID: "))
 
-                cursor.execute(
-                    "INSERT INTO Books (Book_ID, Title, Author, Publisher, `Count`) "
-                    "VALUES (%s, %s, %s, %s, %s)",
-                    (book_id, title, author, publisher, count),
-                )
-                connection.commit()
-                print("Book added.")
+        cur.execute("SELECT * FROM Books WHERE Book_ID=%s", (id,))
+        row = cur.fetchone()
 
-            elif choice == "2":
-                book_id = int(input("Book ID to delete: "))
-                cursor.execute("DELETE FROM Books WHERE Book_ID = %s", (book_id,))
-                connection.commit()
-                if cursor.rowcount:
-                    print("Book deleted.")
-                else:
-                    print("No book found with that ID.")
+        if row:
+            print(row)
+        else:
+            print("Book Not Found")
 
-            elif choice == "3":
-                book_id = int(input("Book ID to edit: "))
-                title = input("New title: ").strip()
-                author = input("New author: ").strip()
-                publisher = input("New publisher: ").strip()
-                count = int(input("New number of copies: "))
+    elif ch == 6:
+        print("Program Exited")
+        break
 
-                if count < 0:
-                    print("Number of copies cannot be negative.")
-                    continue
-                if not title or not author or not publisher:
-                    print("Title, author, and publisher cannot be empty.")
-                    continue
+    else:
+        print("Invalid Choice")
 
-                cursor.execute(
-                    "UPDATE Books SET Title = %s, Author = %s, "
-                    "Publisher = %s, `Count` = %s WHERE Book_ID = %s",
-                    (title, author, publisher, count, book_id),
-                )
-                connection.commit()
-                if cursor.rowcount:
-                    print("Book details updated.")
-                else:
-                    print("No book found with that ID.")
-
-            elif choice == "4":
-                cursor.execute(
-                    "SELECT Book_ID, Title, Author, Publisher, `Count` "
-                    "FROM Books ORDER BY Book_ID"
-                )
-                books = cursor.fetchall()
-                if not books:
-                    print("No books found.")
-                else:
-                    for book in books:
-                        print(
-                            f"ID: {book[0]} | Title: {book[1]} | "
-                            f"Author: {book[2]} | Publisher: {book[3]} | "
-                            f"Copies: {book[4]}"
-                        )
-
-            elif choice == "5":
-                book_id = int(input("Book ID to search: "))
-                cursor.execute(
-                    "SELECT Book_ID, Title, Author, Publisher, `Count` "
-                    "FROM Books WHERE Book_ID = %s",
-                    (book_id,),
-                )
-                book = cursor.fetchone()
-                if book:
-                    print(
-                        f"ID: {book[0]} | Title: {book[1]} | "
-                        f"Author: {book[2]} | Publisher: {book[3]} | "
-                        f"Copies: {book[4]}"
-                    )
-                else:
-                    print("No book found with that ID.")
-
-            elif choice == "6":
-                print("Goodbye.")
-                break
-
-            else:
-                print("Invalid option. Choose a number from 1 to 6.")
-
-    except ValueError:
-        print("Book ID and number of copies must be whole numbers.")
-    except Error as error:
-        if connection is not None:
-            connection.rollback()
-        print(f"MySQL error: {error}")
-    finally:
-        if cursor is not None:
-            cursor.close()
-        if connection is not None:
-            connection.close()
-
-
-if __name__ == "__main__":
-    main()
+# Close database connection
+cur.close()
+con.close()
