@@ -136,8 +136,8 @@ where company_name <> 'TCS';
 -- 7. Find officers who earn more than each officer of Infosys.
 -- Expected: Rahul Singh, Priya Mehta, Manish Gupta, Sneha Nair,
 -- Vikram Das, Divya Kumar (6 rows).
-select p.off_name from placed p 
-where p.salary > ALL(select o.salary from placed o where o.company_name = 'Infosys');
+select off_name from placed where salary > ALL(select salary from placed where company_name = 'Infosys');
+
 -- 8. Find companies located in every city where Infosys is located.
 -- Expected: Infosys (1 row).
 select company_name from comp 
