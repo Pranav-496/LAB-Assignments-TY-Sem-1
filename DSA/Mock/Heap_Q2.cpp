@@ -1,23 +1,34 @@
 /*
 In an online gaming tournament, players receive scores for each round.
 The organizer wants to find the highest and lowest scores among all the participants efficiently. 
-Write a menu-driven C++ program using max heap and min heap to 
-1. insert player scores
-2. display the highest
-3. find and display the highest score
-4. delete the player with highest score
-5. display all the players in order of score.
+Write a menu-driven C++ program using max heap and min heap to:
+1. Insert player scores
+2. Find and display the highest score
+3. Find and display the lowest score
+4. Delete the player with highest score
+5. Display all the players in order of score.
+
+Time Complexity Analysis:
+Operation                               Time Complexity
+-------------------------------------------------------
+Insert into Min/Max Heap                O(log N)
+Find Minimum / Maximum                  O(1)
+Delete root from Max Heap               O(log N)
+Synchronize Min Heap after deletion     O(N)
+Display all scores in sorted order      O(N log N)
 */
 
-#include <bits/stdc++.h>
+#include <iostream>
+#include <vector>
+#include <algorithm>
 using namespace std;
 
 class Heap
 {
+public:
     vector<int> h;
     bool isMax;
 
-public:
     Heap(bool type)
     {
         isMax = type;
@@ -25,10 +36,7 @@ public:
 
     bool compare(int a, int b)
     {
-        if (isMax)
-            return a > b;
-        else
-            return a < b;
+        return isMax ? (a > b) : (a < b);
     }
 
     // Reheap Up
@@ -46,13 +54,6 @@ public:
             else
                 break;
         }
-    }
-
-    // Insert Score
-    void insert(int value)
-    {
-        h.push_back(value);
-        reheapUp(h.size() - 1);
     }
 
     // Reheap Down
@@ -82,6 +83,13 @@ public:
         }
     }
 
+    // Insert Score
+    void insert(int value)
+    {
+        h.push_back(value);
+        reheapUp(h.size() - 1);
+    }
+
     // Delete Root
     int deleteRoot()
     {
@@ -89,7 +97,6 @@ public:
             return -1;
 
         int value = h[0];
-
         h[0] = h.back();
         h.pop_back();
 
@@ -99,78 +106,40 @@ public:
         return value;
     }
 
-    // Delete a particular score
-    void deleteValue(int value)
-    {
-        int i = 0;
-
-        while (i < h.size() && h[i] != value)
-            i++;
-
-        if (i == h.size())
-            return;
-
-        h[i] = h.back();
-        h.pop_back();
-
-        if (i < h.size())
-        {
-            if (i > 0 && compare(h[i], h[(i - 1) / 2]))
-                reheapUp(i);
-            else
-                reheapDown(i);
-        }
-    }
-
-    // Get Root
-    int getRoot()
-    {
-        if (h.empty())
-            return -1;
-
-        return h[0];
-    }
-
-    bool empty()
-    {
-        return h.empty();
-    }
-
-    // Display scores in sorted order
+    // Display scores in descending order
     void display()
     {
         if (h.empty())
         {
-            cout << "No scores available!";
+            cout << "No scores available!\n";
             return;
         }
 
-        Heap temp = *this;
+        vector<int> temp = h;
+        sort(temp.begin(), temp.end(), greater<int>());
 
-        while (!temp.empty())
-            cout << temp.deleteRoot() << " ";
-
-        cout << endl;
+        for (int i = 0; i < (int)temp.size(); i++)
+            cout << temp[i] << " ";
+        cout << "\n";
     }
 };
 
 int main()
 {
-    Heap maxHeap(true);
-    Heap minHeap(false);
+    Heap maxHeap(true);  // Max Heap for highest score
+    Heap minHeap(false); // Min Heap for lowest score
 
     int choice, score;
 
     do
     {
-        cout << "\n\n----- PLAYER SCORE MANAGEMENT -----";
+        cout << "\n----- PLAYER SCORE MANAGEMENT -----";
         cout << "\n1. Insert Player Score";
         cout << "\n2. Find Highest Score";
         cout << "\n3. Find Lowest Score";
         cout << "\n4. Delete Highest Score";
         cout << "\n5. Display Scores in Descending Order";
         cout << "\n6. Exit";
-
         cout << "\nEnter choice: ";
         cin >> choice;
 
@@ -179,38 +148,42 @@ int main()
         case 1:
             cout << "Enter player score: ";
             cin >> score;
-
             maxHeap.insert(score);
             minHeap.insert(score);
-
-            cout << "Score inserted successfully!";
+            cout << "Score inserted successfully!\n";
             break;
 
         case 2:
-            if (maxHeap.empty())
-                cout << "No scores available!";
+            if (maxHeap.h.empty())
+                cout << "No scores available!\n";
             else
-                cout << "Highest Score: " << maxHeap.getRoot();
+                cout << "Highest Score: " << maxHeap.h[0] << "\n";
             break;
 
         case 3:
-            if (minHeap.empty())
-                cout << "No scores available!";
+            if (minHeap.h.empty())
+                cout << "No scores available!\n";
             else
-                cout << "Lowest Score: " << minHeap.getRoot();
+                cout << "Lowest Score: " << minHeap.h[0] << "\n";
             break;
 
         case 4:
-            if (maxHeap.empty())
+            if (maxHeap.h.empty())
             {
-                cout << "No scores available!";
-                break;
+                cout << "No scores available!\n";
             }
+            else
+            {
+                // 1. Delete highest score from maxHeap
+                score = maxHeap.deleteRoot();
 
-            score = maxHeap.deleteRoot();
-            minHeap.deleteValue(score);
+                // 2. Refresh minHeap with remaining scores from maxHeap
+                minHeap.h.clear();
+                for (int s : maxHeap.h)
+                    minHeap.insert(s);
 
-            cout << "Highest score deleted: " << score;
+                cout << "Highest score deleted: " << score << "\n";
+            }
             break;
 
         case 5:
@@ -219,11 +192,11 @@ int main()
             break;
 
         case 6:
-            cout << "Exiting program...";
+            cout << "Exiting program...\n";
             break;
 
         default:
-            cout << "Invalid choice!";
+            cout << "Invalid choice!\n";
         }
 
     } while (choice != 6);
