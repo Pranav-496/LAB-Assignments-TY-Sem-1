@@ -7,13 +7,16 @@ Perform the following operations:
 4. swap left and right subtrees.
 */
 
-#include <bits/stdc++.h>
+#include <iostream>
+#include <string>
+#include <stack>
 using namespace std;
 
 struct Node
 {
   char data;
-  Node *left, *right;
+  Node *left;
+  Node *right;
 
   Node(char ch)
   {
@@ -27,66 +30,42 @@ bool isOperator(char ch)
   return ch == '&' || ch == '|' || ch == '!' || ch == '^';
 }
 
-void destroy(Node *root)
+// Construct tree from Prefix expression
+Node *create(string exp)
 {
-  if (root == NULL)
-    return;
+  stack<Node *> s;
 
-  destroy(root->left);
-  destroy(root->right);
-  delete root;
-}
-
-// Construct tree from Prefix
-Node *constructTree(vector<char> exp)
-{
-  stack<Node *> st;
-
-  for (int i = exp.size() - 1; i >= 0; i--)
+  for (int i = exp.length() - 1; i >= 0; i--)
   {
-    Node *temp = new Node(exp[i]);
+    Node *newNode = new Node(exp[i]);
 
-    if (isOperator(exp[i]))
+    if (!isOperator(exp[i]))
     {
-      if (st.empty())
-      {
-        delete temp;
-        return NULL;
-      }
+      s.push(newNode);
+    }
+    else
+    {
+      newNode->left = s.top();
+      s.pop();
 
-      temp->left = st.top();
-      st.pop();
-
+      // Binary operators take a right child too (unary '!' takes only left)
       if (exp[i] != '!')
       {
-        if (st.empty())
-        {
-          destroy(temp);
-          return NULL;
-        }
-
-        temp->right = st.top();
-        st.pop();
+        newNode->right = s.top();
+        s.pop();
       }
-    }
 
-    st.push(temp);
+      s.push(newNode);
+    }
   }
 
-  if (st.size() != 1)
-    return NULL;
-
-  Node *root = st.top();
-  st.pop();
-  return root;
+  return s.top();
 }
 
-// Recursive traversals
+// Recursive Traversals
 void inorder(Node *root)
 {
-  if (root == NULL)
-    return;
-
+  if (!root) return;
   inorder(root->left);
   cout << root->data << " ";
   inorder(root->right);
@@ -94,9 +73,7 @@ void inorder(Node *root)
 
 void preorder(Node *root)
 {
-  if (root == NULL)
-    return;
-
+  if (!root) return;
   cout << root->data << " ";
   preorder(root->left);
   preorder(root->right);
@@ -104,65 +81,54 @@ void preorder(Node *root)
 
 void postorder(Node *root)
 {
-  if (root == NULL)
-    return;
-
+  if (!root) return;
   postorder(root->left);
   postorder(root->right);
   cout << root->data << " ";
 }
 
-// Non-recursive Inorder
+// Non-Recursive Inorder
 void inorderNR(Node *root)
 {
-  stack<Node *> st;
+  stack<Node *> s;
   Node *curr = root;
 
-  while (curr != NULL || !st.empty())
+  while (curr || !s.empty())
   {
-    while (curr != NULL)
+    while (curr)
     {
-      st.push(curr);
+      s.push(curr);
       curr = curr->left;
     }
-
-    curr = st.top();
-    st.pop();
-
+    curr = s.top();
+    s.pop();
     cout << curr->data << " ";
     curr = curr->right;
   }
 }
 
-// Non-recursive Preorder
+// Non-Recursive Preorder
 void preorderNR(Node *root)
 {
-  if (root == NULL)
-    return;
+  if (!root) return;
+  stack<Node *> s;
+  s.push(root);
 
-  stack<Node *> st;
-  st.push(root);
-
-  while (!st.empty())
+  while (!s.empty())
   {
-    Node *curr = st.top();
-    st.pop();
-
+    Node *curr = s.top();
+    s.pop();
     cout << curr->data << " ";
 
-    if (curr->right)
-      st.push(curr->right);
-    if (curr->left)
-      st.push(curr->left);
+    if (curr->right) s.push(curr->right);
+    if (curr->left) s.push(curr->left);
   }
 }
 
-// Non-recursive Postorder
+// Non-Recursive Postorder (Using 2 Stacks)
 void postorderNR(Node *root)
 {
-  if (root == NULL)
-    return;
-
+  if (!root) return;
   stack<Node *> s1, s2;
   s1.push(root);
 
@@ -170,13 +136,10 @@ void postorderNR(Node *root)
   {
     Node *curr = s1.top();
     s1.pop();
-
     s2.push(curr);
 
-    if (curr->left)
-      s1.push(curr->left);
-    if (curr->right)
-      s1.push(curr->right);
+    if (curr->left) s1.push(curr->left);
+    if (curr->right) s1.push(curr->right);
   }
 
   while (!s2.empty())
@@ -186,156 +149,64 @@ void postorderNR(Node *root)
   }
 }
 
-// Compare two subtrees
+// Check if two subtrees are identical
 bool sameTree(Node *a, Node *b)
 {
-  if (a == NULL && b == NULL)
-    return true;
-  if (a == NULL || b == NULL)
-    return false;
-
-  return a->data == b->data &&
-         sameTree(a->left, b->left) &&
-         sameTree(a->right, b->right);
+  if (!a && !b) return true;
+  if (!a || !b) return false;
+  return (a->data == b->data) && sameTree(a->left, b->left) && sameTree(a->right, b->right);
 }
 
-// Simplify Boolean Expression
+// Simplify Boolean Expression using Logical Laws
 Node *simplify(Node *root)
 {
-  if (root == NULL)
-    return NULL;
+  if (!root) return NULL;
 
   root->left = simplify(root->left);
   root->right = simplify(root->right);
 
   char op = root->data;
-  Node *a = root->left;
-  Node *b = root->right;
+  Node *L = root->left;
+  Node *R = root->right;
 
-  // NOT operation
-  if (op == '!')
+  // Double Negation: !(!A) = A
+  if (op == '!' && L && L->data == '!')
+    return L->left;
+
+  // AND Laws (&)
+  if (op == '&')
   {
-    if (a->data == '0' || a->data == '1')
-    {
-      char val = (a->data == '0') ? '1' : '0';
-      destroy(root);
-      return new Node(val);
-    }
-
-    if (a->data == '!')
-    {
-      Node *temp = a->left;
-      a->left = NULL;
-      root->left = NULL;
-      delete a;
-      delete root;
-      return temp;
-    }
+    if (L->data == '0' || R->data == '0') return new Node('0'); // Annihilation: A & 0 = 0
+    if (L->data == '1') return R;                               // Identity: 1 & A = A
+    if (R->data == '1') return L;                               // Identity: A & 1 = A
+    if (sameTree(L, R)) return L;                               // Idempotence: A & A = A
   }
 
-  if (op == '&' || op == '|')
+  // OR Laws (|)
+  if (op == '|')
   {
-    bool isAnd = (op == '&');
-
-    // Same operands: A&A=A, A|A=A
-    if (sameTree(a, b))
-    {
-      root->left = root->right = NULL;
-      delete b;
-      delete root;
-      return a;
-    }
-
-    // Constant on left
-    if (a->data == '0' || a->data == '1')
-    {
-      if ((isAnd && a->data == '0') ||
-          (!isAnd && a->data == '1'))
-      {
-        destroy(root);
-        return new Node(isAnd ? '0' : '1');
-      }
-
-      root->left = NULL;
-      root->right = NULL;
-      delete root;
-      delete a;
-      return b;
-    }
-
-    // Constant on right
-    if (b->data == '0' || b->data == '1')
-    {
-      if ((isAnd && b->data == '0') ||
-          (!isAnd && b->data == '1'))
-      {
-        destroy(root);
-        return new Node(isAnd ? '0' : '1');
-      }
-
-      root->left = NULL;
-      root->right = NULL;
-      delete root;
-      delete b;
-      return a;
-    }
+    if (L->data == '1' || R->data == '1') return new Node('1'); // Annihilation: A | 1 = 1
+    if (L->data == '0') return R;                               // Identity: 0 | A = A
+    if (R->data == '0') return L;                               // Identity: A | 0 = A
+    if (sameTree(L, R)) return L;                               // Idempotence: A | A = A
   }
 
-  // XOR simplification
+  // XOR Laws (^)
   if (op == '^')
   {
-    if (sameTree(a, b))
-    {
-      destroy(root);
-      return new Node('0');
-    }
-
-    if (a->data == '0')
-    {
-      root->left = root->right = NULL;
-      delete root;
-      delete a;
-      return b;
-    }
-
-    if (b->data == '0')
-    {
-      root->left = NULL;
-      root->right = NULL;
-      delete root;
-      delete b;
-      return a;
-    }
-
-    if (a->data == '1')
-    {
-      root->data = '!';
-      root->left = b;
-      root->right = NULL;
-      delete a;
-      return root;
-    }
-
-    if (b->data == '1')
-    {
-      root->data = '!';
-      root->right = NULL;
-      delete b;
-      return root;
-    }
+    if (sameTree(L, R)) return new Node('0');                   // A ^ A = 0
+    if (L->data == '0') return R;                               // 0 ^ A = A
+    if (R->data == '0') return L;                               // A ^ 0 = A
   }
 
   return root;
 }
 
-// Mirror tree
+// Swap / Mirror left and right subtrees
 void mirror(Node *root)
 {
-  if (root == NULL)
-    return;
-
+  if (!root) return;
   swap(root->left, root->right);
-
   mirror(root->left);
   mirror(root->right);
 }
@@ -343,7 +214,6 @@ void mirror(Node *root)
 int main()
 {
   Node *root = NULL;
-  vector<char> exp;
   string input;
   int choice;
 
@@ -360,34 +230,17 @@ int main()
     cout << "\n8. Simplify Expression";
     cout << "\n9. Mirror Tree";
     cout << "\n10. Exit";
-
     cout << "\nEnter choice: ";
     cin >> choice;
 
     switch (choice)
     {
     case 1:
-    {
       cout << "Enter prefix expression: ";
       cin >> input;
-
-      exp.clear();
-
-      for (char ch : input)
-        exp.push_back(ch);
-
-      Node *newRoot = constructTree(exp);
-
-      if (newRoot == NULL)
-        cout << "Invalid expression!";
-      else
-      {
-        destroy(root);
-        root = newRoot;
-        cout << "Tree constructed successfully!";
-      }
+      root = create(input);
+      cout << "Tree constructed successfully!";
       break;
-    }
 
     case 2:
       cout << "Inorder: ";
@@ -405,31 +258,35 @@ int main()
       break;
 
     case 5:
-      cout << "Inorder: ";
+      cout << "Inorder (NR): ";
       inorderNR(root);
       break;
 
     case 6:
-      cout << "Preorder: ";
+      cout << "Preorder (NR): ";
       preorderNR(root);
       break;
 
     case 7:
-      cout << "Postorder: ";
+      cout << "Postorder (NR): ";
       postorderNR(root);
       break;
 
     case 8:
-      if (root != NULL)
+      if (root)
       {
         root = simplify(root);
-        cout << "Expression simplified!";
+        cout << "Expression simplified! New Inorder: ";
+        inorder(root);
       }
+      else
+        cout << "Tree is empty!";
       break;
 
     case 9:
       mirror(root);
-      cout << "Tree mirrored!";
+      cout << "Tree mirrored! New Inorder: ";
+      inorder(root);
       break;
 
     case 10:
@@ -442,6 +299,5 @@ int main()
 
   } while (choice != 10);
 
-  destroy(root);
   return 0;
 }

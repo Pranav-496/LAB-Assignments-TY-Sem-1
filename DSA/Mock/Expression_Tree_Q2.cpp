@@ -1,19 +1,24 @@
 /*
-write a menu-driven C++ program to construct an expression tree for a Boolean expression given in postfix form.
+Write a menu-driven C++ program to construct an expression tree for an expression given in postfix form (e.g., 45+2* or AB+C*D-).
 Perform the following operations:
-1. traverse the tree in inorder, preorder, postorder, both recursively and non-recursively
-2. evaluate the expression if the operands are numeric
-3. convert and display the equivalent prefix and infix expressions
-4. display the height of the expression tree
+1. Traverse the tree in inorder, preorder, postorder, both recursively and non-recursively
+2. Evaluate the expression if the operands are numeric
+3. Convert and display equivalent prefix and infix expressions
+4. Display the height of the expression tree
 */
 
-#include <bits/stdc++.h>
+#include <iostream>
+#include <string>
+#include <stack>
+#include <cmath>
+#include <algorithm>
 using namespace std;
 
 struct Node
 {
   char data;
-  Node *left, *right;
+  Node *left;
+  Node *right;
 
   Node(char ch)
   {
@@ -24,112 +29,58 @@ struct Node
 
 bool isOperator(char ch)
 {
-  return ch == '+' || ch == '-' || ch == '*' ||
-         ch == '/' || ch == '^';
+  return ch == '+' || ch == '-' || ch == '*' || ch == '/' || ch == '^';
 }
 
-void destroy(Node *root)
+// Construct Expression Tree from Postfix expression
+Node *create(string exp)
 {
-  if (root == NULL)
-    return;
-
-  destroy(root->left);
-  destroy(root->right);
-  delete root;
-}
-
-// Construct tree from Postfix
-Node *constructTree(vector<char> exp)
-{
-  stack<Node *> st;
+  stack<Node *> s;
 
   for (char ch : exp)
   {
-    Node *temp = new Node(ch);
+    Node *newNode = new Node(ch);
 
-    if (isOperator(ch))
+    if (!isOperator(ch))
     {
-      if (st.size() < 2)
-      {
-        delete temp;
-
-        while (!st.empty())
-        {
-          destroy(st.top());
-          st.pop();
-        }
-
-        return NULL;
-      }
-
-      temp->right = st.top();
-      st.pop();
-
-      temp->left = st.top();
-      st.pop();
+      s.push(newNode);
     }
-
-    else if (ch < '0' || ch > '9')
+    else
     {
-      delete temp;
+      // In postfix, the first popped is right child, second is left child
+      newNode->right = s.top();
+      s.pop();
 
-      while (!st.empty())
-      {
-        destroy(st.top());
-        st.pop();
-      }
+      newNode->left = s.top();
+      s.pop();
 
-      return NULL;
+      s.push(newNode);
     }
-
-    st.push(temp);
   }
 
-  if (st.size() != 1)
-  {
-    while (!st.empty())
-    {
-      destroy(st.top());
-      st.pop();
-    }
-
-    return NULL;
-  }
-
-  Node *root = st.top();
-  st.pop();
-
-  return root;
+  return s.top();
 }
 
-// Recursive Inorder
+// Recursive Traversals
 void inorder(Node *root)
 {
-  if (root == NULL)
-    return;
-
+  if (!root) return;
   inorder(root->left);
   cout << root->data << " ";
   inorder(root->right);
 }
 
-// Recursive Preorder
 void preorder(Node *root)
 {
-  if (root == NULL)
-    return;
-
+  if (!root) return;
   cout << root->data << " ";
   preorder(root->left);
   preorder(root->right);
 }
 
-// Recursive Postorder
 void postorder(Node *root)
 {
-  if (root == NULL)
-    return;
-
+  if (!root) return;
   postorder(root->left);
   postorder(root->right);
   cout << root->data << " ";
@@ -138,20 +89,18 @@ void postorder(Node *root)
 // Non-Recursive Inorder
 void inorderNR(Node *root)
 {
-  stack<Node *> st;
+  stack<Node *> s;
   Node *curr = root;
 
-  while (curr != NULL || !st.empty())
+  while (curr || !s.empty())
   {
-    while (curr != NULL)
+    while (curr)
     {
-      st.push(curr);
+      s.push(curr);
       curr = curr->left;
     }
-
-    curr = st.top();
-    st.pop();
-
+    curr = s.top();
+    s.pop();
     cout << curr->data << " ";
     curr = curr->right;
   }
@@ -160,33 +109,25 @@ void inorderNR(Node *root)
 // Non-Recursive Preorder
 void preorderNR(Node *root)
 {
-  if (root == NULL)
-    return;
+  if (!root) return;
+  stack<Node *> s;
+  s.push(root);
 
-  stack<Node *> st;
-  st.push(root);
-
-  while (!st.empty())
+  while (!s.empty())
   {
-    Node *curr = st.top();
-    st.pop();
-
+    Node *curr = s.top();
+    s.pop();
     cout << curr->data << " ";
 
-    if (curr->right)
-      st.push(curr->right);
-
-    if (curr->left)
-      st.push(curr->left);
+    if (curr->right) s.push(curr->right);
+    if (curr->left) s.push(curr->left);
   }
 }
 
-// Non-Recursive Postorder
+// Non-Recursive Postorder (Using 2 Stacks)
 void postorderNR(Node *root)
 {
-  if (root == NULL)
-    return;
-
+  if (!root) return;
   stack<Node *> s1, s2;
   s1.push(root);
 
@@ -194,14 +135,10 @@ void postorderNR(Node *root)
   {
     Node *curr = s1.top();
     s1.pop();
-
     s2.push(curr);
 
-    if (curr->left)
-      s1.push(curr->left);
-
-    if (curr->right)
-      s1.push(curr->right);
+    if (curr->left) s1.push(curr->left);
+    if (curr->right) s1.push(curr->right);
   }
 
   while (!s2.empty())
@@ -211,9 +148,12 @@ void postorderNR(Node *root)
   }
 }
 
-// Evaluate Expression
+// Evaluate numeric expression
 double evaluate(Node *root)
 {
+  if (!root) return 0;
+
+  // Leaf node (numeric operand)
   if (!isOperator(root->data))
     return root->data - '0';
 
@@ -222,74 +162,49 @@ double evaluate(Node *root)
 
   switch (root->data)
   {
-  case '+':
-    return left + right;
-
-  case '-':
-    return left - right;
-
-  case '*':
-    return left * right;
-
-  case '/':
-    if (right == 0)
-      throw runtime_error("Division by zero!");
-    return left / right;
-
-  case '^':
-    return pow(left, right);
+  case '+': return left + right;
+  case '-': return left - right;
+  case '*': return left * right;
+  case '/': return (right != 0) ? (left / right) : 0;
+  case '^': return pow(left, right);
   }
 
   return 0;
 }
 
-// Display Prefix
+// Display Prefix notation (Preorder)
 void prefix(Node *root)
 {
-  if (root == NULL)
-    return;
-
-  cout << root->data << " ";
-  prefix(root->left);
-  prefix(root->right);
+  preorder(root);
 }
 
-// Display Infix
+// Display Infix notation with parentheses
 void infix(Node *root)
 {
-  if (root == NULL)
-    return;
+  if (!root) return;
 
   if (isOperator(root->data))
     cout << "( ";
 
   infix(root->left);
-
   cout << root->data << " ";
-
   infix(root->right);
 
   if (isOperator(root->data))
     cout << ") ";
 }
 
-// Calculate Height
+// Calculate height of the tree
 int height(Node *root)
 {
-  if (root == NULL)
-    return 0;
-
-  int lh = height(root->left);
-  int rh = height(root->right);
-
-  return 1 + max(lh, rh);
+  if (!root) return 0;
+  return 1 + max(height(root->left), height(root->right));
 }
 
 int main()
 {
   Node *root = NULL;
-  vector<char> exp;
-  char ch;
+  string input;
   int choice;
 
   do
@@ -307,33 +222,17 @@ int main()
     cout << "\n10. Display Infix";
     cout << "\n11. Display Height";
     cout << "\n12. Exit";
-
     cout << "\nEnter choice: ";
     cin >> choice;
 
     switch (choice)
     {
     case 1:
-    {
-      exp.clear();
-
       cout << "Enter postfix expression: ";
-
-      while (cin >> ch && ch != '#')
-        exp.push_back(ch);
-
-      Node *newRoot = constructTree(exp);
-
-      if (newRoot == NULL)
-        cout << "Invalid postfix expression!";
-      else
-      {
-        destroy(root);
-        root = newRoot;
-        cout << "Tree constructed successfully!";
-      }
+      cin >> input;
+      root = create(input);
+      cout << "Tree constructed successfully!";
       break;
-    }
 
     case 2:
       cout << "Inorder: ";
@@ -351,34 +250,25 @@ int main()
       break;
 
     case 5:
-      cout << "Inorder: ";
+      cout << "Inorder (NR): ";
       inorderNR(root);
       break;
 
     case 6:
-      cout << "Preorder: ";
+      cout << "Preorder (NR): ";
       preorderNR(root);
       break;
 
     case 7:
-      cout << "Postorder: ";
+      cout << "Postorder (NR): ";
       postorderNR(root);
       break;
 
     case 8:
-      if (root == NULL)
+      if (!root)
         cout << "Tree is empty!";
       else
-      {
-        try
-        {
-          cout << "Result: " << evaluate(root);
-        }
-        catch (const exception &e)
-        {
-          cout << e.what();
-        }
-      }
+        cout << "Result: " << evaluate(root);
       break;
 
     case 9:
@@ -405,6 +295,5 @@ int main()
 
   } while (choice != 12);
 
-  destroy(root);
   return 0;
 }
