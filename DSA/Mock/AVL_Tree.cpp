@@ -10,7 +10,9 @@ Perform the following operations:
 6. determine the maximum number of comparisons required for searching any employee.
 */
 
-#include <bits/stdc++.h>
+#include <iostream>
+#include <string>
+#include <algorithm>
 using namespace std;
 
 class Node {
@@ -75,20 +77,34 @@ public:
         return y;
     }
 
-    Node* insert(Node *x, int id, string name, bool &inserted) {
-        if (x == NULL) {
-            inserted = true;
+    Node* ll(Node *x) {
+        return rot_right(x);
+    }
+
+    Node* rr(Node *x) {
+        return rot_left(x);
+    }
+
+    Node* lr(Node *x) {
+        x->left = rot_left(x->left);
+        return rot_right(x);
+    }
+
+    Node* rl(Node *x) {
+        x->right = rot_right(x->right);
+        return rot_left(x);
+    }
+
+    Node* insert(Node *x, int id, string name) {
+        if (x == NULL)
             return new Node(id, name);
-        }
 
         if (id < x->id)
-            x->left = insert(x->left, id, name, inserted);
-
+            x->left = insert(x->left, id, name);
         else if (id > x->id)
-            x->right = insert(x->right, id, name, inserted);
-
+            x->right = insert(x->right, id, name);
         else {
-            inserted = false;
+            cout << "Employee ID already exists!\n";
             return x;
         }
 
@@ -98,62 +114,53 @@ public:
 
         // LL Case
         if (bf > 1 && id < x->left->id)
-            return rot_right(x);
+            return ll(x);
+
+        // LR Case
+        if (bf > 1 && id > x->left->id)
+            return lr(x);
 
         // RR Case
         if (bf < -1 && id > x->right->id)
-            return rot_left(x);
-
-        // LR Case
-        if (bf > 1 && id > x->left->id) {
-            x->left = rot_left(x->left);
-            return rot_right(x);
-        }
+            return rr(x);
 
         // RL Case
-        if (bf < -1 && id < x->right->id) {
-            x->right = rot_right(x->right);
-            return rot_left(x);
-        }
+        if (bf < -1 && id < x->right->id)
+            return rl(x);
 
         return x;
     }
 
-    Node* minNode(Node *x) {
-        while (x->left != NULL)
-            x = x->left;
-
-        return x;
-    }
-
-    Node* deleteNode(Node *x, int id, bool &deleted) {
+    Node* deleteNode(Node *x, int id) {
         if (x == NULL)
             return NULL;
 
         if (id < x->id)
-            x->left = deleteNode(x->left, id, deleted);
-
+            x->left = deleteNode(x->left, id);
         else if (id > x->id)
-            x->right = deleteNode(x->right, id, deleted);
-
+            x->right = deleteNode(x->right, id);
         else {
-            deleted = true;
-
-            // Zero or one child
-            if (x->left == NULL || x->right == NULL) {
-                Node *child = x->left ? x->left : x->right;
+            // Node with 0 or 1 child
+            if (x->left == NULL) {
+                Node *temp = x->right;
                 delete x;
-                return child;
+                return temp;
+            }
+            else if (x->right == NULL) {
+                Node *temp = x->left;
+                delete x;
+                return temp;
             }
 
-            // Two children
-            Node *successor = minNode(x->right);
+            // Node with 2 children: get In-order Successor
+            Node *successor = x->right;
+            while (successor->left != NULL)
+                successor = successor->left;
 
             x->id = successor->id;
             x->name = successor->name;
 
-            bool temp = false;
-            x->right = deleteNode(x->right, successor->id, temp);
+            x->right = deleteNode(x->right, successor->id);
         }
 
         x->ht = height(x);
@@ -162,23 +169,19 @@ public:
 
         // LL Case
         if (bf > 1 && balance(x->left) >= 0)
-            return rot_right(x);
+            return ll(x);
 
         // LR Case
-        if (bf > 1 && balance(x->left) < 0) {
-            x->left = rot_left(x->left);
-            return rot_right(x);
-        }
+        if (bf > 1 && balance(x->left) < 0)
+            return lr(x);
 
         // RR Case
         if (bf < -1 && balance(x->right) <= 0)
-            return rot_left(x);
+            return rr(x);
 
         // RL Case
-        if (bf < -1 && balance(x->right) > 0) {
-            x->right = rot_right(x->right);
-            return rot_left(x);
-        }
+        if (bf < -1 && balance(x->right) > 0)
+            return rl(x);
 
         return x;
     }
@@ -204,9 +207,7 @@ public:
             return;
 
         ascending(x->left);
-
         cout << x->id << " : " << x->name << endl;
-
         ascending(x->right);
     }
 
@@ -215,56 +216,8 @@ public:
             return;
 
         descending(x->right);
-
         cout << x->id << " : " << x->name << endl;
-
         descending(x->left);
-    }
-
-    void insertEmployee(int id, string name) {
-        bool inserted = false;
-        root = insert(root, id, name, inserted);
-
-        if (inserted)
-            cout << "Employee inserted successfully!\n";
-        else
-            cout << "Employee ID already exists!\n";
-    }
-
-    void searchEmployee(int id) {
-        int comparisons = 0;
-
-        Node *temp = search(root, id, comparisons);
-
-        if (temp != NULL) {
-            cout << "Employee found!\n";
-            cout << "Employee ID   : " << temp->id << endl;
-            cout << "Employee Name : " << temp->name << endl;
-        }
-        else {
-            cout << "Employee not found!\n";
-        }
-
-        cout << "Comparisons made: " << comparisons << endl;
-    }
-
-    void deleteEmployee(int id) {
-        bool deleted = false;
-        root = deleteNode(root, id, deleted);
-
-        if (deleted)
-            cout << "Employee deleted successfully!\n";
-        else
-            cout << "Employee ID not found!\n";
-    }
-
-    void displayHeight() {
-        cout << "Height of AVL Tree: " << height(root) << endl;
-    }
-
-    void maxComparisons() {
-        cout << "Maximum comparisons required: "
-             << height(root) << endl;
     }
 };
 
@@ -298,22 +251,43 @@ int main() {
             cin >> ws;
             getline(cin, name);
 
-            t.insertEmployee(id, name);
+            t.root = t.insert(t.root, id, name);
+            cout << "Employee record processed.\n";
             break;
 
-        case 2:
+        case 2: {
             cout << "Enter Employee ID to search: ";
             cin >> id;
 
-            t.searchEmployee(id);
-            break;
+            int comparisons = 0;
+            Node *temp = t.search(t.root, id, comparisons);
 
-        case 3:
+            if (temp != NULL) {
+                cout << "Employee found!\n";
+                cout << "Employee ID   : " << temp->id << endl;
+                cout << "Employee Name : " << temp->name << endl;
+                cout << "Comparisons made: " << comparisons << endl;
+            }
+            else {
+                cout << "Employee not found!\n";
+            }
+            break;
+        }
+
+        case 3: {
             cout << "Enter Employee ID to delete: ";
             cin >> id;
 
-            t.deleteEmployee(id);
+            int dummy = 0;
+            if (t.search(t.root, id, dummy) != NULL) {
+                t.root = t.deleteNode(t.root, id);
+                cout << "Employee deleted successfully!\n";
+            }
+            else {
+                cout << "Employee ID not found!\n";
+            }
             break;
+        }
 
         case 4:
             cout << "\nEmployees in Ascending Order:\n";
@@ -326,11 +300,11 @@ int main() {
             break;
 
         case 6:
-            t.displayHeight();
+            cout << "Height of AVL Tree: " << t.height(t.root) << endl;
             break;
 
         case 7:
-            t.maxComparisons();
+            cout << "Maximum comparisons required: " << t.height(t.root) << endl;
             break;
 
         case 8:
