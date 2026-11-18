@@ -76,6 +76,7 @@ The [`DSA`](./DSA) folder contains C++ implementations covering graph algorithms
 | Server Processing Task Scheduling | Fractional Knapsack (Greedy Approach) | [Fractional_Knapsack_Q2.cpp](./DSA/Mock/Fractional_Knapsack_Q2.cpp) |
 | Social Network Friendship Connections | Graph ADT (Adjacency Matrix & List, 1-Hop Connectivity) | [Graph_Q1.cpp](./DSA/Mock/Graph_Q1.cpp) |
 | Airline Route Partnerships | Graph ADT (Adjacency Matrix & List, 1-Hop Connectivity) | [Graph_Q2.cpp](./DSA/Mock/Graph_Q2.cpp) |
+| Flight Network Routes (Time & Cost) | Graph ADT (Adjacency List & Matrix, Reachability, Paths) | [Graph_Q3.cpp](./DSA/Mock/Graph_Q3.cpp) |
 | Job Priority Scheduling | Min/Max Heap (Complexity Analysis, Priority Ordering) | [Heap_Q1.cpp](./DSA/Mock/Heap_Q1.cpp) |
 | Online Gaming Tournament Scores | Min/Max Heap (Highest/Lowest Scores, Extraction) | [Heap_Q2.cpp](./DSA/Mock/Heap_Q2.cpp) |
 | Stock Price Tracker & Analysis | Min/Max Heap (Min/Max Tracking, Sorting, Complexity Analysis) | [Heap_Q3.cpp](./DSA/Mock/Heap_Q3.cpp) |
