@@ -35,11 +35,11 @@ public:
         root = NULL;
     }
 
-    int height(Node *x) {
-        if (x == NULL)
+    int height(Node *root) {
+        if (root == NULL)
             return 0;
 
-        return x->ht;
+        return 1 + max(height(root->left), height(root->right));
     }
 
     int balance(Node *x) {
@@ -49,10 +49,6 @@ public:
         return height(x->left) - height(x->right);
     }
 
-    void updateHeight(Node *x) {
-        x->ht = 1 + max(height(x->left), height(x->right));
-    }
-
     Node* rot_right(Node *x) {
         Node *y = x->left;
         Node *t = y->right;
@@ -60,8 +56,8 @@ public:
         y->right = x;
         x->left = t;
 
-        updateHeight(x);
-        updateHeight(y);
+        x->ht = height(x);
+        y->ht = height(y);
 
         return y;
     }
@@ -73,8 +69,8 @@ public:
         y->left = x;
         x->right = t;
 
-        updateHeight(x);
-        updateHeight(y);
+        x->ht = height(x);
+        y->ht = height(y);
 
         return y;
     }
@@ -96,7 +92,7 @@ public:
             return x;
         }
 
-        updateHeight(x);
+        x->ht = height(x);
 
         int bf = balance(x);
 
@@ -160,7 +156,7 @@ public:
             x->right = deleteNode(x->right, successor->id, temp);
         }
 
-        updateHeight(x);
+        x->ht = height(x);
 
         int bf = balance(x);
 

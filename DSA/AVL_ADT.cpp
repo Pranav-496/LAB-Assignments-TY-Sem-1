@@ -69,29 +69,17 @@ node *tree::rot_left(node *x)
 int tree::height(node *x)
 {
     if (x == nullptr)
-        return -1;
+        return 0;
 
     return 1 + max(height(x->left), height(x->right));
 }
 
 int tree::bf(node *x)
 {
-    int hl, hr;
-
     if (!x)
         return 0;
 
-    if (!x->left)
-        hl = 0;
-    else
-        hl = x->left->ht + 1;
-
-    if (!x->right)
-        hr = 0;
-    else
-        hr = x->right->ht + 1;
-
-    return hl - hr;
+    return height(x->left) - height(x->right);
 }
 
 node *tree::rr(node *x)
@@ -130,7 +118,7 @@ node *tree::insert(node *root, string newKey, string newMean)
 
         curr->key = newKey;
         curr->mean = newMean;
-        curr->ht = 0;
+        curr->ht = 1;
         curr->left = NULL;
         curr->right = NULL;
 
