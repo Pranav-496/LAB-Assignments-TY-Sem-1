@@ -71,7 +71,7 @@ int main()
       fraction = (double)capacity / items[i].weight;
       capacity = 0;
     }
-
+-
     double selectedWeight = fraction * items[i].weight;
     double selectedBenefit = fraction * items[i].benefit;
 
