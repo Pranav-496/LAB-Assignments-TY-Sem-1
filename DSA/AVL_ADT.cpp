@@ -175,48 +175,68 @@ node *tree::insert(node *root, string newKey, string newMean)
 
 node *tree::deleteNode(node *root, string key)
 {
-    if (!root)
+    // 1. Standard BST Search
+    if (root == NULL)
         return NULL;
 
     if (key < root->key)
-    {
         root->left = deleteNode(root->left, key);
-    }
     else if (key > root->key)
-    {
         root->right = deleteNode(root->right, key);
-    }
     else
     {
-        if (!root->left || !root->right)
+        // 2. Found the node to delete!
+
+        // Case 1 & 2: Node has 0 or 1 child
+        if (root->left == NULL)
         {
-            node *child = root->left ? root->left : root->right;
+            node *temp = root->right;
             delete root;
-            return child;
+            return temp;
+        }
+        else if (root->right == NULL)
+        {
+            node *temp = root->left;
+            delete root;
+            return temp;
         }
 
+        // Case 3: Node has 2 children
+        // Find In-order Successor (smallest node in the right subtree)
         node *successor = root->right;
-        while (successor->left)
+        while (successor->left != NULL)
             successor = successor->left;
 
+        // Copy successor's data to current node
         root->key = successor->key;
         root->mean = successor->mean;
+
+        // Delete the duplicate successor from right subtree
         root->right = deleteNode(root->right, successor->key);
     }
 
+    // 3. Update Height
     root->ht = height(root);
 
-    if (bf(root) > 1)
+    // 4. Rebalance the Tree
+    int b = bf(root);
+
+    // Left-Heavy
+    if (b > 1)
     {
         if (bf(root->left) >= 0)
-            return ll(root);
-        return lr(root);
+            return ll(root); // LL Case
+        else
+            return lr(root); // LR Case
     }
-    if (bf(root) < -1)
+
+    // Right-Heavy
+    if (b < -1)
     {
         if (bf(root->right) <= 0)
-            return rr(root);
-        return rl(root);
+            return rr(root); // RR Case
+        else
+            return rl(root); // RL Case
     }
 
     return root;
